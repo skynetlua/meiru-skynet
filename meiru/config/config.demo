@@ -1,0 +1,39 @@
+include "config.header"
+
+---------------------------------------------------------------------
+-- 启动配置
+---------------------------------------------------------------------
+thread      = 8
+harbor      = 0
+bootstrap   = "snlua bootstrap"
+--daemon      = "./remote.pid"
+
+--logger  = "./log/test.log"
+logpath   = "."
+start     = "main"
+maxclient = 20480
+
+----------------------------------------------------
+--test项目配置
+----------------------------------------------------
+dbgport	  = 8888
+httpport  = 8080
+httpsport = 8081
+
+
+--test_path = projects_path .. "test/"
+--lua_path   = lua_path .. test_path .. "lualib/?.lua;"
+--luaservice = luaservice .. test_path .. "service/?.lua;"
+
+-- 集群配置
+--cluster = test_path .. "lualib/cluster/clustername.lua"
+
+-- 预加载文件
+--preload = test_path .. "lualib/preload/__preload.lua"
+
+-- 数据库配置
+--mysql = [[{host = '127.0.0.1',port = '3306',database = 'demo',username = 'root',password = '123456'}]]
+
+
+
+

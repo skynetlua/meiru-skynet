@@ -1,0 +1,60 @@
+-- 工程根目录
+projects_path = "./"
+
+----------------------------------------------------
+--skynet项目配置
+----------------------------------------------------
+skynet_path = projects_path .. "skynet/"
+lua_cpath  = skynet_path .. "luaclib/?.so"
+cpath      = skynet_path .. "cservice/?.so"
+lualoader  = skynet_path .. "lualib/loader.lua"
+snax       = skynet_path .. "lualib/?.lua;"
+lua_path   = skynet_path .. "lualib/?.lua;"
+luaservice = skynet_path .. "service/?.lua;"
+
+----------------------------------------------------
+--meiru项目配置
+----------------------------------------------------
+meiru_path = projects_path .. "meiru/"
+lua_path   = lua_path .. meiru_path .. "lualib/?.lua;"
+luaservice = luaservice .. meiru_path .. "service/?.lua;"
+
+----------------------------------------------------
+--test项目配置
+----------------------------------------------------
+test_path = projects_path .. "test/"
+lua_path   = lua_path .. test_path .. "lualib/?.lua;"
+luaservice = luaservice .. test_path .. "service/?.lua;"
+
+
+-- 集群配置
+--cluster = test_path .. "lualib/cluster/clustername.lua"
+
+-- 预加载文件
+preload = test_path .. "lualib/preload/__preload.lua"
+
+-- 数据库配置
+mysql = [[{host = '127.0.0.1',port = '3306',database = 'demo',username = 'root',password = '123456'}]]
+
+
+---------------------------------------------------------------------
+-- 启动配置
+---------------------------------------------------------------------
+thread      = 8
+harbor      = 0
+bootstrap   = "snlua bootstrap"
+--daemon      = "./remote.pid"
+
+--logger  = "./log/test.log"
+logpath   = "."
+start     = "main"
+maxclient = 20480
+
+---------------------------------------------------------------------
+--自定义配置
+---------------------------------------------------------------------
+dbgport	  = 8888
+httpport  = 8080
+httpsport = 8081
+
+

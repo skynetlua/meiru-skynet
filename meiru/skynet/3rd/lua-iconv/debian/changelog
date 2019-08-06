@@ -1,0 +1,28 @@
+lua-iconv (7-1) unstable; urgency=low
+
+  * Update package for lua-iconv 7 + Lua-5.2
+
+ -- Alexandre Erwin Ittner <alexandre@ittner.com.br>  Sun, 06 May 2012 22:35:22 -0300
+
+lua-iconv (6-3) unstable; urgency=low
+
+  * debian/control: Conflicts, Provides, and Replaces lua-iconv
+    (Closes: #557052)
+
+ -- Jon Bernard <jbernard@debian.org>  Fri, 20 Nov 2009 18:58:12 -0600
+
+lua-iconv (6-2) unstable; urgency=low
+
+  * debian/control: update package name to conform to lua standard
+    (Closes: #544958)
+  * debian/control: add Vcs fields
+  * debian/control: update package description
+  * debian/watch: look for new upstream releases on luaforge (Closes: #544960)
+
+ -- Jon Bernard <jbernard@debian.org>  Wed, 28 Oct 2009 11:58:00 -0400
+
+lua-iconv (6-1) unstable; urgency=low
+
+  * Initial release (Closes: #540298)
+
+ -- Jon Bernard <jbernard@debian.org>  Sun, 02 Aug 2009 13:50:50 -0400

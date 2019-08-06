@@ -1,0 +1,21 @@
+Source: lua-iconv
+Section: interpreters
+Priority: optional
+Maintainer: Jon Bernard <jbernard@debian.org>
+Build-Depends: debhelper (>= 7), liblua5.2-dev, lua5.2, pkg-config
+Standards-Version: 3.8.2
+Vcs-Git: https://github.com/ittner/lua-iconv.git
+Vcs-Browser: https://github.com/ittner/lua-iconv.git
+Homepage: http://ittner.github.com/lua-iconv/
+
+Package: liblua5.2-iconv0
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Recommends: lua5.2
+Conflicts: lua-iconv
+Provides: lua-iconv
+Replaces: lua-iconv
+Description: iconv bindings for the Lua programming language
+ This package provides POSIX 'iconv' bindings for the Lua programming language.
+ It converts a sequence of characters from one codeset into a sequence of
+ corresponding characters in another codeset.

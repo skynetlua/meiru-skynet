@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <meta name='description' content='<%= config.description %>' />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="keywords" content="<%= config.keywords %>"/>
+    <% if topic then %>
+    <title><%= topic.title %> - <%= config.name %></title>
+    <% elseif pageTitle then %>
+    <title><%= pageTitle %> - <%= config.name %></title>
+    <% else %>
+    <title><%= config.description %></title>
+    <% end %>
+</head>
+<body>
+    <h1>It's Work!!!</h1>
+<div class='navbar'>
+    <h3><%= helloworld() %></h3>
+</div>
+<div id='main'>
+    <%- body %>
+</div>
+<div id='footer'>
+    <%- partial('./footer') %>
+</div>
+</body>
+</html>

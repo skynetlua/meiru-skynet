@@ -1,0 +1,27 @@
+-- 工程根目录
+projects_path = "./"
+
+----------------------------------------------------
+--skynet项目配置
+----------------------------------------------------
+skynet_path = projects_path .. "meiru/skynet/"
+lua_cpath  = skynet_path .. "luaclib/?.so"
+cpath      = skynet_path .. "cservice/?.so"
+lualoader  = skynet_path .. "lualib/loader.lua"
+snax       = skynet_path .. "lualib/?.lua;"
+lua_path   = skynet_path .. "lualib/?.lua;"
+luaservice = skynet_path .. "service/?.lua;"
+
+----------------------------------------------------
+--meiru项目配置
+----------------------------------------------------
+meiru_path = projects_path .. "meiru/"
+lua_path   = lua_path .. meiru_path .. "lualib/?.lua;"
+luaservice = luaservice .. meiru_path .. "service/?.lua;"
+
+----------------------------------------------------
+--启动参数配置
+----------------------------------------------------
+thread    = 8
+harbor    = 0
+bootstrap = "snlua bootstrap"
