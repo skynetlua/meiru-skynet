@@ -197,6 +197,12 @@ setup(){
 	SYSTEM=$(uname)
 	SYSTEM=$(echo $SYSTEM | tr '[A-Z]' '[a-z]')
 	make ${SYSTEM}
+	pushd ${SKYNET_DIR}/3rd/jemalloc
+	make clean
+	popd
+	pushd ${SKYNET_DIR}/3rd/lua
+	make clean
+	popd
 }
 
 case "${1}" in
