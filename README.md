@@ -21,7 +21,13 @@ centos系统下。其他linux系统或者macosx系统。需要cd到meiru/skynet�
 git clone https://github.com/skynetlua/meiru-skynet.git
 ```
 
-2. 创建工程
+2. 配置工程
+```
+./meiru/bin/meiru setup
+```
+meiru setup会自动下载安装gcc，readline等。自动进行编译。skynet编译后，生成skynet程序，就可以在其他主机运行，而无需要再次编译。
+
+3. 创建工程
 以创建test项目为例，在终端，cd到meiru-skynet目录下。执行
 ```
 ./meiru/bin/meiru create test
@@ -31,13 +37,13 @@ git clone https://github.com/skynetlua/meiru-skynet.git
 meiru create test
 ```
 
-3. 启动工程
+4. 启动工程
 ```
 ./meiru/bin/meiru start test
 ```
 浏览器打开127.0.0.1:8080/index。既可以看到结果
 
-4. 停止服务
+5. 停止服务
 ```
 ./meiru/bin/meiru stop test
 ```
