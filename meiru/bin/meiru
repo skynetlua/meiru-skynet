@@ -149,10 +149,61 @@ create(){
 	sed -i s/test/${PROJECT}/g ${WORK_SPACE}/${PROJECT}/lua/app.lua
 }
 
+install(){
+	PROGRAM=${1}
+	TYPE=${2}
+	if [[ -z ${TYPE} ]]; then
+		TYPE=app
+	fi
+	if [[ ${TYPE} = "app" ]]; then
+		RET=$(which ${PROGRAM})
+		RET=$(echo ${RET}|grep /${PROGRAM})
+	else
+		RET=$(ldconfig -p |grep ${PROGRAM}.so$)
+	fi
+
+	if [[ -z "$RET" ]]; then
+		echo "install：${PROGRAM}"
+		yum install -y ${PROGRAM}
+		if [[ ${TYPE} = "app" ]]; then
+			RET=$(which ${PROGRAM})
+			RET=$(echo ${RET}|grep /${PROGRAM})
+		else
+			RET=$(ldconfig -p |grep ${PROGRAM}.so$)
+		fi
+		if [[ -z "$RET" ]]; then
+			echo "[ERROR]install ${PROGRAM} failed"
+			exit
+		fi
+	else
+		echo "installed：${PROGRAM}"
+	fi
+}
+
+setup(){
+	install gcc
+	yum install -y readline-devel
+	SKYNET_DIR=$(dirname "${BIN_DIR}")/skynet
+	pushd ${SKYNET_DIR}/
+	make clean
+	pushd ${SKYNET_DIR}/3rd/jemalloc
+	make clean
+	popd
+	pushd ${SKYNET_DIR}/3rd/lua
+	make clean
+	popd
+	popd
+	cd ${SKYNET_DIR}
+	SYSTEM=$(uname)
+	SYSTEM=$(echo $SYSTEM | tr '[A-Z]' '[a-z]')
+	make ${SYSTEM}
+}
+
 case "${1}" in
 	start)shift 1;start ${@};;
 	stop)shift 1;stop ${@};;
 	create)shift 1;create ${@};;
 	kill)shift 1;forcekill ${@};;
+	setup)shift 1;setup;;
 	*)echo "Usage : ${0} start|stop,not ${1}"
 esac
