@@ -140,9 +140,19 @@ stop(){
 	fi	
 }
 
+create(){
+	PROJECT=${1}
+	mkdir -p ${WORK_SPACE}/${PROJECT}
+	cp -rf $(dirname "${BIN_DIR}")/template/* ${WORK_SPACE}/${PROJECT}
+	mv ${WORK_SPACE}/${PROJECT}/config/config.test ${WORK_SPACE}/${PROJECT}/config/config.${PROJECT}
+	sed -i s/test/${PROJECT}/g ${WORK_SPACE}/${PROJECT}/config/config.${PROJECT}
+	sed -i s/test/${PROJECT}/g ${WORK_SPACE}/${PROJECT}/lua/app.lua
+}
+
 case "${1}" in
 	start)shift 1;start ${@};;
 	stop)shift 1;stop ${@};;
+	create)shift 1;create ${@};;
 	kill)shift 1;forcekill ${@};;
 	*)echo "Usage : ${0} start|stop,not ${1}"
 esac

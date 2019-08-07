@@ -1,6 +1,4 @@
-local cached      = include(".db.cached", ...)
-local modelsd = include(".db.modelsd", ...)
-
+local cached = include(".db.cached", ...)
 
 local platform = {}
 
@@ -9,29 +7,6 @@ if ok then
 
 local lfs   = require "lfs"
 local md5   = require "md5"
--- local cjson = require "cjson"
-local mysqldbd = include(".db.mysqldbd", ...)
--- local mysqldbd = require "meiru.db.mysqldbd"
-
-local database = {
-	select  = mysqldbd.select,
-	query   = mysqldbd.query,
-	gets    = modelsd.gets,
-	get     = modelsd.get,
-	fields  = modelsd.fields,
-	insert  = modelsd.insert,
-	update  = modelsd.update,
-	updates = modelsd.updates,
-	clear   = modelsd.clear,
-	remove  = modelsd.remove,
-	removes = modelsd.removes,
-	delete  = modelsd.delete,
-	deletes = modelsd.deletes,
-}
-
-function platform.database()
-	return database
-end
 
 --file
 function platform.file_attr(file_path)
@@ -57,32 +32,11 @@ end
 function platform.time()
 	return skynet.hpc()/1000000000
 end
-
 --
 else
 
 local json = include(".3rd.json", ...)
 local md5  = include(".3rd.md5", ...)
-
-local database = {
-	select  = function(...) log("[platform]database.select", ...) end,
-	query   = function(...) log("[platform]database.query", ...) end,
-	gets    = modelsd.gets,
-	get     = modelsd.get,
-	fields  = modelsd.fields,
-	insert  = modelsd.insert,
-	update  = modelsd.update,
-	updates = modelsd.updates,
-	clear   = modelsd.clear,
-	remove  = modelsd.remove,
-	removes = modelsd.removes,
-	delete  = modelsd.delete,
-	deletes = modelsd.deletes,
-}
-
-function platform.get_database()
-	return database
-end
 
 function platform.file_modify_time(file_path)
 	return 1560495220

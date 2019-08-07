@@ -1,3 +1,21 @@
+local modelsd = include("modelsd", ...)
+local mysqldbd = include("mysqldbd", ...)
+local database_default = {
+	select  = mysqldbd.select,
+	query   = mysqldbd.query,
+	gets    = modelsd.gets,
+	get     = modelsd.get,
+	fields  = modelsd.fields,
+	insert  = modelsd.insert,
+	update  = modelsd.update,
+	updates = modelsd.updates,
+	clear   = modelsd.clear,
+	remove  = modelsd.remove,
+	removes = modelsd.removes,
+	delete  = modelsd.delete,
+	deletes = modelsd.deletes,
+}
+
 local table = table
 local string = string
 local type = type
@@ -97,7 +115,7 @@ end
 local platform = include(".util.platform", ...)
 
 return function(tblName, db)
-	local database = db or platform.database()
+	local database = db or database_default
 	assert(database)
 	local Model = {}
 	Model.__index = Model

@@ -3,10 +3,16 @@ local skynet = require "skynet"
 local string = string
 local table = table
 
-local _mysqldbd 
-skynet.init(function()
-    _mysqldbd = skynet.newservice("meiru/mysqldbd")
-end)
+local have_mysql= skynet.getenv("mysql") and true
+
+
+local _mysqldbd
+
+if have_mysql then
+    skynet.init(function()
+        _mysqldbd = skynet.newservice("meiru/mysqldbd")
+    end)
+end
 
 --执行
 local kMDoSaveInterval = 10
@@ -121,7 +127,9 @@ function Cache:set(ckey, val, timeout)
     if timeout < kMTmpSaveIntervel then
         return
     end
-    self:add_savequeue(ckey)
+    if have_mysql then
+        self:add_savequeue(ckey)
+    end
 end
 
 function Cache:get_data(ckey)
@@ -137,15 +145,17 @@ function Cache:get_data(ckey)
             return data
         end
     end
-    local cond = string.format("WHERE `ckey` = '%s'", ckey:quote_sql_str())
-    local ret = skynet.call(_mysqldbd, "lua", "select", self.mname, cond)
-    assert(#ret < 2)
-    if #ret == 1 then
-        data = ret[1]
-        assert(data.ckey == ckey)
-        self:add_data(data)
-    else
-        self.datas[ckey] = false
+    if have_mysql then
+        local cond = string.format("WHERE `ckey` = '%s'", ckey:quote_sql_str())
+        local ret = skynet.call(_mysqldbd, "lua", "select", self.mname, cond)
+        assert(#ret < 2)
+        if #ret == 1 then
+            data = ret[1]
+            assert(data.ckey == ckey)
+            self:add_data(data)
+        else
+            self.datas[ckey] = false
+        end
     end
     return data
 end
@@ -161,11 +171,9 @@ function Cache:save(ckey)
     local data = self.datas[ckey]
     if data then
         local ret
-        -- skynet.log("Cache:save data =", data)
         if data.id then
             local cond = string.format("WHERE `id` = %s", data.id)
             ret = skynet.call(_mysqldbd, "lua", "update", self.mname, data, cond)
-            -- skynet.log("Cache:save ret1 =", ret)
         else
             ret = skynet.call(_mysqldbd, "lua", "insert", self.mname, data, "ckey")
             -- skynet.log("Cache:save ret2 =", ret)
@@ -186,14 +194,21 @@ function Cache:remove(ckey)
     self.save_map[ckey] = nil
     local data = self.datas[ckey]
     self.datas[ckey] = false
-    local sql = string.format("DELETE FROM `%s` WHERE `ckey` = '%s'", self.mname, ckey:quote_sql_str())
-    skynet.send(_mysqldbd, "lua", "query", sql)
+
+    if have_mysql then
+        local sql = string.format("DELETE FROM `%s` WHERE `ckey` = '%s'", self.mname, ckey:quote_sql_str())
+        skynet.send(_mysqldbd, "lua", "query", sql)
+    end
+
     return data
 end
 
 function Cache:clear_time_out()
-    local sql = string.format("DELETE FROM `%s` WHERE `deadline` != 0 and `deadline` < %s", self.mname, os.time())
-    skynet.send(_mysqldbd, "lua", "query", sql)
+    if have_mysql then
+        local sql = string.format("DELETE FROM `%s` WHERE `deadline` != 0 and `deadline` < %s", self.mname, os.time())
+        skynet.send(_mysqldbd, "lua", "query", sql)
+    end
+
     local cur_time = os.time()
     local datas = self.datas
     for k,data in pairs(datas) do

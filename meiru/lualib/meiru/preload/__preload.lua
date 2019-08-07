@@ -1,6 +1,4 @@
 local skynet = require "skynet"
-os.mode = 'dev'
-
 local function __dump(t, d, dups)
     if type(t) ~= "table" then 
         return t and tostring(t) or "nil"
@@ -50,5 +48,9 @@ function skynet.log(...)
  	skynet.error(info, output)
 end
 
+local debug = skynet.getenv("debug")
+if debug then
+    os.mode = 'dev'
+end
 require "meiru.extension"
 

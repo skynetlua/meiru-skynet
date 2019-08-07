@@ -1,0 +1,18 @@
+include "config.header"
+
+-- 预加载文件
+preload = meiru_path .. "lualib/meiru/preload/__preload.lua"
+
+---------------------------------------------------------------------
+-- 启动配置
+---------------------------------------------------------------------
+thread    = 8
+harbor    = 0
+bootstrap = "snlua bootstrap"
+--daemon  = "./remote.pid"
+--logger  = "./log/test.log"
+logpath   = "."
+start     = "meiru/main"
+maxclient = 20480
+
+
