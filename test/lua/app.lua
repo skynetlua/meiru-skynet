@@ -20,7 +20,7 @@ local router = meiru.router()
 router.get('/index', function(req, res)
     local data = {
         topic = {
-            title = "hello ejs.lua"
+            title = "hello elua"
         },
         topics = {
             {
