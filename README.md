@@ -32,13 +32,13 @@ meiru create test
 
 3. 启动工程
 ```
-./meiru/bin/meiru start demo
+./meiru/bin/meiru start test
 ```
 浏览器打开127.0.0.1:8080。既可以看到结果
 
 4. 停止服务
 ```
-./meiru/bin/meiru stop demo
+./meiru/bin/meiru stop test
 ```
 
 
