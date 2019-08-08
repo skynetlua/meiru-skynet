@@ -146,7 +146,7 @@ create(){
 	cp -rf $(dirname "${BIN_DIR}")/template/* ${WORK_SPACE}/${PROJECT}
 	mv ${WORK_SPACE}/${PROJECT}/config/config.test ${WORK_SPACE}/${PROJECT}/config/config.${PROJECT}
 	sed -i s/test/${PROJECT}/g ${WORK_SPACE}/${PROJECT}/config/config.${PROJECT}
-	sed -i s/test/${PROJECT}/g ${WORK_SPACE}/${PROJECT}/lua/app.lua
+	sed -i s/test/${PROJECT}/g ${WORK_SPACE}/${PROJECT}/lualib/app.lua
 }
 
 chechexist(){
@@ -170,9 +170,9 @@ install(){
 			TOOL_INSTALL="yum -y install"
 			break
 		fi
-		chechexist apt
+		chechexist apt-get
 		if [[ ! -z "${RET}" ]]; then
-			TOOL_INSTALL="apt install"
+			TOOL_INSTALL="apt-get install"
 			break
 		fi
 		echo "Sorry,NO support install program. feedback to github!"
@@ -193,6 +193,13 @@ build(){
 	SYSTEM=$(uname)
 	SYSTEM=$(echo $SYSTEM | tr '[A-Z]' '[a-z]')
 	make ${SYSTEM}
+
+	PBC_DIR=${SKYNET_DIR}/3rd/pbc
+	cd ${PBC_DIR}
+	make
+	cd ${PBC_DIR}/binding/lua53
+	make
+	cp ${PBC_DIR}/binding/lua53/protobuf.so ${SKYNET_DIR}/luaclib
 }
 
 clean(){
@@ -203,7 +210,14 @@ clean(){
 	make clean
 	cd ${SKYNET_DIR}/3rd/lua
 	make clean
+
+	PBC_DIR=${SKYNET_DIR}/3rd/pbc
+	cd ${PBC_DIR}
+	make clean
+	cd ${PBC_DIR}/binding/lua53
+	make clean
 }
+
 
 case "${1}" in
 	start)shift 1;start ${@};;
@@ -215,3 +229,8 @@ case "${1}" in
 	clean)clean;;
 	*)echo "Usage : ${0} start|stop,not ${1}"
 esac
+
+# automake
+# yum install libtool
+# yum install gcc-c++ 
+# ./configure

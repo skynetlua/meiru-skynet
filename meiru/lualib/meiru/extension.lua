@@ -536,7 +536,7 @@ function dump_memory()
     local lua_mem1 = collectgarbage("count")
     collectgarbage("collect")
     local lua_mem2 = collectgarbage("count")
-    local ret = string.format("lua已用内存:%sKB=>%sKB", lua_mem1, lua_mem2) .. "活跃对象实例:"
+    local ret = string.format("lua已用内存:%sKB=>%sKB", lua_mem1, lua_mem2) .. "\n活跃对象实例:"
     local rets = {ret}
     for key, map in pairs(alive_map) do
         if key ~= "open" then

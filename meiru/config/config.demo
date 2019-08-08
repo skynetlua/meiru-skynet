@@ -21,7 +21,7 @@ httpport  = 8080
 httpsport = 8081
 
 
---test_path = projects_path .. "test/"
+--test_path = current_path
 --lua_path   = lua_path .. test_path .. "lualib/?.lua;"
 --luaservice = luaservice .. test_path .. "service/?.lua;"
 

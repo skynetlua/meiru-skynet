@@ -11,6 +11,8 @@ local service_wss   = skynet.getenv("service_wss")
 local service_num   = skynet.getenv("service_num")
 
 skynet.start(function()
+    log("meiru_path =", skynet.getenv("meiru_path"))
+    log("test_path =", skynet.getenv("test_path"))
     filed.init()
 
     if service_http or service_ws then

@@ -67,11 +67,8 @@ function coders.lua()
 end
 
 function coders.protobuf()
-    assert(false)
-end
-
-function coders.sproto()
-    assert(false)
+    local protobuf = require "protobuf"
+    return protobuf
 end
 
 return function(ctype)

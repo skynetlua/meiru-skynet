@@ -4,11 +4,11 @@ include "../../meiru/config/config.main"
 ----------------------------------------------------
 --test项目配置
 ----------------------------------------------------
-test_path = projects_path .. "test/"
-lua_path  = lua_path .. test_path .. "lua/?.lua;"
+test_path = current_path
+lua_path  = lua_path .. test_path .. "lualib/?.lua;"
 
 --
 debug = 1
 service_http = "app"
 http_port    = 8080
-service_num  = 4
+service_num  = 1

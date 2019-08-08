@@ -1,10 +1,10 @@
 -- 工程根目录
-projects_path = "./"
+meiru_path = current_path
 
 ----------------------------------------------------
 --skynet项目配置
 ----------------------------------------------------
-skynet_path = projects_path .. "meiru/skynet/"
+skynet_path = meiru_path .. "skynet/"
 lua_cpath  = skynet_path .. "luaclib/?.so"
 cpath      = skynet_path .. "cservice/?.so"
 lualoader  = skynet_path .. "lualib/loader.lua"
@@ -15,7 +15,6 @@ luaservice = skynet_path .. "service/?.lua;"
 ----------------------------------------------------
 --meiru项目配置
 ----------------------------------------------------
-meiru_path = projects_path .. "meiru/"
 lua_path   = lua_path .. meiru_path .. "lualib/?.lua;"
 luaservice = luaservice .. meiru_path .. "service/?.lua;"
 

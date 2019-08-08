@@ -104,8 +104,10 @@ static const char * load_config = "\
 		local code = assert(f:read [[*a]])\n\
 		code = string.gsub(code, [[%$([%w_%d]+)]], getenv)\n\
 		f:close()\n\
+		result.current_path = current_path .. '..'..sep \n\
 		assert(load(code,[[@]]..filename,[[t]],result))()\n\
 		current_path = last_path\n\
+		result.current_path = current_path .. '..'..sep \n\
 	end\n\
 	setmetatable(result, { __index = { include = include } })\n\
 	local config_name = ...\n\
