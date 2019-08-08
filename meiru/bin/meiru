@@ -164,29 +164,30 @@ chechexist(){
 }
 
 install(){
-	chechexist ${@}
-	if [[ -z "${RET}" ]]; then
-		echo "install：${PROGRAM}"
-		yum install -y ${PROGRAM}
-		if [[ ${TYPE} = "app" ]]; then
-			RET=$(which ${PROGRAM})
-			RET=$(echo ${RET}|grep /${PROGRAM})
-		else
-			RET=$(ldconfig -p |grep ${PROGRAM}.so$)
+	while true; do
+		chechexist yum
+		if [[ ! -z "${RET}" ]]; then
+			TOOL_INSTALL="yum -y install"
+			break
 		fi
-		if [[ -z "${RET}" ]]; then
-			echo "[ERROR]install ${PROGRAM} failed"
-			exit
+		chechexist apt
+		if [[ ! -z "${RET}" ]]; then
+			TOOL_INSTALL="apt install"
+			break
 		fi
-	fi
+		echo "Sorry,NO support install program. feedback to github!"
+	done
+	${TOOL_INSTALL} ${1}
 }
 
 setup(){
 	install gcc
-	chechexist readline lib
-	if [[ -z "${RET}" ]]; then
-		yum install -y readline-devel
-	fi
+	install autoconf
+	install readline-devel
+	install openssl-devel
+}
+
+build(){
 	SKYNET_DIR=$(dirname "${BIN_DIR}")/skynet
 	cd ${SKYNET_DIR}
 	SYSTEM=$(uname)
@@ -209,7 +210,8 @@ case "${1}" in
 	stop)shift 1;stop ${@};;
 	create)shift 1;create ${@};;
 	kill)shift 1;forcekill ${@};;
-	setup)shift 1;setup;;
-	clean)shift 1;clean;;
+	setup)setup;;
+	build)build;;
+	clean)clean;;
 	*)echo "Usage : ${0} start|stop,not ${1}"
 esac
