@@ -194,12 +194,12 @@ build(){
 	SYSTEM=$(echo $SYSTEM | tr '[A-Z]' '[a-z]')
 	make ${SYSTEM}
 
-	PBC_DIR=${SKYNET_DIR}/3rd/pbc
-	cd ${PBC_DIR}
-	make
-	cd ${PBC_DIR}/binding/lua53
-	make
-	cp ${PBC_DIR}/binding/lua53/protobuf.so ${SKYNET_DIR}/luaclib
+	# PBC_DIR=${SKYNET_DIR}/3rd/pbc
+	# cd ${PBC_DIR}
+	# make
+	# cd ${PBC_DIR}/binding/lua53
+	# make
+	# cp ${PBC_DIR}/binding/lua53/protobuf.so ${SKYNET_DIR}/luaclib
 }
 
 clean(){
@@ -211,11 +211,11 @@ clean(){
 	cd ${SKYNET_DIR}/3rd/lua
 	make clean
 
-	PBC_DIR=${SKYNET_DIR}/3rd/pbc
-	cd ${PBC_DIR}
-	make clean
-	cd ${PBC_DIR}/binding/lua53
-	make clean
+	# PBC_DIR=${SKYNET_DIR}/3rd/pbc
+	# cd ${PBC_DIR}
+	# make clean
+	# cd ${PBC_DIR}/binding/lua53
+	# make clean
 }
 
 
