@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -O2 -fPIC -Wall
 # LUADIR = /usr/local/include
-LUADIR = ../../lua
+LUADIR = ../../../lua
 TARGET = protobuf.so
 
 .PHONY : all clean
