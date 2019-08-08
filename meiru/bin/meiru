@@ -149,7 +149,7 @@ create(){
 	sed -i s/test/${PROJECT}/g ${WORK_SPACE}/${PROJECT}/lua/app.lua
 }
 
-install(){
+chechexist(){
 	PROGRAM=${1}
 	TYPE=${2}
 	if [[ -z ${TYPE} ]]; then
@@ -161,8 +161,11 @@ install(){
 	else
 		RET=$(ldconfig -p |grep ${PROGRAM}.so$)
 	fi
+}
 
-	if [[ -z "$RET" ]]; then
+install(){
+	chechexist ${@}
+	if [[ -z "${RET}" ]]; then
 		echo "install：${PROGRAM}"
 		yum install -y ${PROGRAM}
 		if [[ ${TYPE} = "app" ]]; then
@@ -171,38 +174,34 @@ install(){
 		else
 			RET=$(ldconfig -p |grep ${PROGRAM}.so$)
 		fi
-		if [[ -z "$RET" ]]; then
+		if [[ -z "${RET}" ]]; then
 			echo "[ERROR]install ${PROGRAM} failed"
 			exit
 		fi
-	else
-		echo "installed：${PROGRAM}"
 	fi
 }
 
 setup(){
 	install gcc
-	yum install -y readline-devel
+	chechexist readline lib
+	if [[ -z "${RET}" ]]; then
+		yum install -y readline-devel
+	fi
 	SKYNET_DIR=$(dirname "${BIN_DIR}")/skynet
-	pushd ${SKYNET_DIR}/
-	make clean
-	pushd ${SKYNET_DIR}/3rd/jemalloc
-	make clean
-	popd
-	pushd ${SKYNET_DIR}/3rd/lua
-	make clean
-	popd
-	popd
 	cd ${SKYNET_DIR}
 	SYSTEM=$(uname)
 	SYSTEM=$(echo $SYSTEM | tr '[A-Z]' '[a-z]')
 	make ${SYSTEM}
-	pushd ${SKYNET_DIR}/3rd/jemalloc
+}
+
+clean(){
+	SKYNET_DIR=$(dirname "${BIN_DIR}")/skynet
+	cd ${SKYNET_DIR}/
 	make clean
-	popd
-	pushd ${SKYNET_DIR}/3rd/lua
+	cd ${SKYNET_DIR}/3rd/jemalloc
 	make clean
-	popd
+	cd ${SKYNET_DIR}/3rd/lua
+	make clean
 }
 
 case "${1}" in
@@ -211,5 +210,6 @@ case "${1}" in
 	create)shift 1;create ${@};;
 	kill)shift 1;forcekill ${@};;
 	setup)shift 1;setup;;
+	clean)shift 1;clean;;
 	*)echo "Usage : ${0} start|stop,not ${1}"
 esac
