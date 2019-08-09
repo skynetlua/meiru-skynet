@@ -105,6 +105,11 @@ http_port    = 8080
 service_num  = 8
 ```
 
+## 调试学习
+如果想调试看看meiru的结构。可以使用vscode调试，但只能在非skynet模式下。具体步骤如下
+用vscode打开目录./test/lualib/，然后安装lua debug插件，选中vscode_debug.lua文件作为启动脚本。就可以进行调试。
+如果是通过./meiru/bin/start方式启动，就不支持IDE调试。需要使用打日志的形似。也提供了工具log。log会把table打印出来。如果第一个参数是true，如log(true)，就会把函数调用栈也打印出来。
+meiru使用了大量缓存机制。在开发阶段只要设置os.mode = 'dev'，就可以禁用缓存。
 
 ## skyent框架介绍
 软件是充分利用硬件资源，方便满足各种计算业务的需求。在服务器领域，计算机需要提供网络通信、数据存储和计算。
