@@ -82,8 +82,8 @@ meiru create test
 test项目的结构如下
 ```
 assets //存放资源
-config //启动这个项目的配置文件
-lua //存放lua脚本库文件
+config //项目的启动配置文件
+lualib //存放lua脚本库文件
 ```
 
 ###配置文件介绍
@@ -95,15 +95,18 @@ include "../../meiru/config/config.main"
 ----------------------------------------------------
 --test项目配置
 ----------------------------------------------------
-test_path = projects_path .. "test/"
-lua_path  = lua_path .. test_path .. "lua/?.lua;"
+--current_path 内部变量，该项目的路径
+test_path = current_path
+--把lualib文件夹加入到lua的搜索路径
+lua_path  = lua_path .. test_path .. "lualib/?.lua;"
 
 --开启测试模式
 debug = 1
 --http回调文件
 service_http = "app"
 http_port    = 8080
-service_num  = 1
+--开启服务个数，推荐CPU核数的2倍
+service_num  = 8
 ```
 
 
