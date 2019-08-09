@@ -171,12 +171,12 @@ setup_centos(){
 }
 
 setup_ubuntu(){
-	sudo apt-get install make
-	sudo apt-get install gcc
-	sudo apt-get install autoconf
-	sudo apt-get install gawk
-	sudo apt-get install libreadline-dev
-	sudo apt-get install libssl-dev
+	sudo apt-get -y install make
+	sudo apt-get -y install gcc
+	sudo apt-get -y install autoconf
+	sudo apt-get -y install gawk
+	sudo apt-get -y install libreadline-dev
+	sudo apt-get -y install libssl-dev
 }
 
 setup(){
