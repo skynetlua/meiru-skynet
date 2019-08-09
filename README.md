@@ -16,6 +16,16 @@ meiru是一个功能强大，同时支持10万链接，并且业务逻辑支持�
 
 ## 快速使用
 推荐在centos7系统运行
+目前适配的系统：centos7,ubuntu。其他系统尚未适配过。
+centos7安装git工具
+```
+sudo yum install -y git
+```
+ubuntu安装git工具
+```
+sudo apt-get install -y git
+```
+
 ### 1. 下载源代码，或者使用git克隆
 ```
 git clone https://github.com/skynetlua/meiru-skynet.git
