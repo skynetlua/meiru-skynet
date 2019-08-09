@@ -25,6 +25,7 @@ meiru依托skynet社区，不断地建立起中国的开源社区。
 ## 快速使用
 推荐在centos7系统运行
 目前适配的系统：centos7,ubuntu。其他系统尚未适配过。
+
 centos7安装git工具
 ```
 sudo yum install -y git
