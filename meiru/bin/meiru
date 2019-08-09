@@ -149,7 +149,7 @@ create(){
 	sed -i s/test/${PROJECT}/g ${WORK_SPACE}/${PROJECT}/lualib/app.lua
 }
 
-chechexist(){
+checkexist(){
 	PROGRAM=${1}
 	TYPE=${2}
 	if [[ -z ${TYPE} ]]; then
@@ -163,28 +163,36 @@ chechexist(){
 	fi
 }
 
-install(){
+setup_centos(){
+	sudo yum -y install gcc
+	sudo yum -y install autoconf
+	sudo yum -y install readline-devel
+	sudo yum -y install openssl-devel
+}
+
+setup_ubuntu(){
+	sudo apt-get install make
+	sudo apt-get install gcc
+	sudo apt-get install autoconf
+	sudo apt-get install gawk
+	sudo apt-get install libreadline-dev
+	sudo apt-get install libssl-dev
+}
+
+setup(){
 	while true; do
-		chechexist yum
+		checkexist yum
 		if [[ ! -z "${RET}" ]]; then
-			TOOL_INSTALL="yum -y install"
+			setup_centos
 			break
 		fi
-		chechexist apt-get
+		checkexist apt-get
 		if [[ ! -z "${RET}" ]]; then
-			TOOL_INSTALL="apt-get install"
+			setup_ubuntu
 			break
 		fi
 		echo "Sorry,NO support install program. feedback to github!"
 	done
-	${TOOL_INSTALL} ${1}
-}
-
-setup(){
-	install gcc
-	install autoconf
-	install readline-devel
-	install openssl-devel
 }
 
 build(){
