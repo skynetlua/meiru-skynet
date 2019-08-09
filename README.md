@@ -42,7 +42,7 @@ git clone https://github.com/skynetlua/meiru-skynet.git
 
 ### 2. 配置工程
 ```
-cd yourfoldxxx/meiru-skynet
+cd yourfolder/meiru-skynet
 ./meiru/bin/meiru setup
 ```
 meiru setup会自动下载安装gcc，autoconf，readline，openssl等。
