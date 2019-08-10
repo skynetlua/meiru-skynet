@@ -179,6 +179,22 @@ setup_ubuntu(){
 	sudo apt-get -y install libssl-dev
 }
 
+setup_darwin(){
+	checkexist gcc
+	if [[ -z "${RET}" ]]; then
+		echo "need install gcc"
+		exit
+	fi
+	checkexist make
+	if [[ -z "${RET}" ]]; then
+		echo "need install make"
+		exit
+	fi
+	brew install autoconf
+	brew install readline
+	brew install openssl
+}
+
 setup(){
 	while true; do
 		checkexist yum
@@ -191,7 +207,16 @@ setup(){
 			setup_ubuntu
 			break
 		fi
-		echo "Sorry,NO support install program. feedback to github!"
+		checkexist brew
+		if [[ ! -z "${RET}" ]]; then
+			setup_darwin
+			break
+		fi
+		if [[ "$(uname)" = "Darwin" ]]; then
+			echo "Darwin need install brew"
+			exit
+		fi
+		echo "Sorry,NO support $(uname). feedback to github!"
 		break
 	done
 }
@@ -200,15 +225,29 @@ build(){
 	SKYNET_DIR=$(dirname "${BIN_DIR}")/skynet
 	cd ${SKYNET_DIR}
 	SYSTEM=$(uname)
+	if [[ "${SYSTEM}" = "Darwin" ]]; then
+		SYSTEM="macosx"
+	fi
 	SYSTEM=$(echo $SYSTEM | tr '[A-Z]' '[a-z]')
 	make ${SYSTEM}
+}
 
-	# PBC_DIR=${SKYNET_DIR}/3rd/pbc
-	# cd ${PBC_DIR}
-	# make
-	# cd ${PBC_DIR}/binding/lua53
-	# make
-	# cp ${PBC_DIR}/binding/lua53/protobuf.so ${SKYNET_DIR}/luaclib
+buildpbc(){
+	SKYNET_DIR=$(dirname "${BIN_DIR}")/skynet
+	cd ${SKYNET_DIR}
+	PBC_DIR=${SKYNET_DIR}/3rd/pbc
+	cd ${PBC_DIR}
+	make
+	cd ${PBC_DIR}/binding/lua53
+	make
+	cp ${PBC_DIR}/binding/lua53/protobuf.so ${SKYNET_DIR}/luaclib
+	cp ${PBC_DIR}/binding/lua53/protobuf.lua ${SKYNET_DIR}/lualib
+
+	PBC_DIR=${SKYNET_DIR}/3rd/pbc
+	cd ${PBC_DIR}
+	make clean
+	cd ${PBC_DIR}/binding/lua53
+	make clean
 }
 
 clean(){
@@ -219,12 +258,6 @@ clean(){
 	make clean
 	cd ${SKYNET_DIR}/3rd/lua
 	make clean
-
-	# PBC_DIR=${SKYNET_DIR}/3rd/pbc
-	# cd ${PBC_DIR}
-	# make clean
-	# cd ${PBC_DIR}/binding/lua53
-	# make clean
 }
 
 
@@ -236,6 +269,7 @@ case "${1}" in
 	setup)setup;;
 	build)build;;
 	clean)clean;;
+	buildpbc)buildpbc;;
 	*)echo "Usage : ${0} start|stop,not ${1}"
 esac
 
