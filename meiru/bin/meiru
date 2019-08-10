@@ -192,6 +192,7 @@ setup(){
 			break
 		fi
 		echo "Sorry,NO support install program. feedback to github!"
+		break
 	done
 }
 
