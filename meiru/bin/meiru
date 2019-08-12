@@ -23,7 +23,7 @@ forcekill(){
 	do
 		PID=$(ps -ef |grep ${1} |grep -v grep |awk '{print $2}')
 		if [[ ! -z ${PID} ]]; then
-			kill ${PID}
+			kill -9 ${PID}
 			echo "forcekill ${1}:${PID}"
 		else
 			break
@@ -35,7 +35,7 @@ forcekill(){
 	do
 		PID=$(ps -ef |grep ${1} |grep -v grep|awk '{print $3}')
 		if [[ ! -z ${PID} ]]; then
-			kill ${PID}
+			kill -9 ${PID}
 			echo "forcekill parent ${1}:${PID}"
 		else
 			break
