@@ -40,7 +40,7 @@ function ComRender:match(req, res)
 		local body, chunks = render(res.render_params.view, data)
         req.app.__chunks = chunks
 		local layout = res.get_layout()
-		if layout then
+		if layout and #layout > 0 then
 			data.body = body
     		res.body = render(layout, data)
     	else

@@ -13,9 +13,9 @@ function ComResponse:match(req, res)
 		res.app.response(res, res.get_statuscode(), res.get_body(), res.get_headers())
 		return true
 	elseif res.req_ret == false then
-		log("dispatch failed")
+		log("dispatch failed:", req.rawurl)
 	else
-		log("dispatch nothing")
+		log("dispatch nothing:", req.rawurl)
 		assert(not res.is_end)
 	end
 	res.app.response(res, 404, "HelloWorld404")

@@ -484,9 +484,9 @@ function class(cname, super)
                 map = alive_map[date_key]
                 setmetatable(map, {__mode = "kv"})
             end
-            map[inst] = clazz.__cname .."(" .. (__tostring(...) or "")..")"
-            -- local info = debug.getinfo(3)
-            -- map[inst]  = info.short_src.. ":"..info.currentline ..":" .. clazz.__cname .."(" .. (__tostring(...) or "")..")"
+            local info = debug.getinfo(2)
+
+            map[inst]  = info.short_src.. ":"..info.currentline ..":" .. clazz.__cname .."(" .. (__tostring(...) or "")..")"
         end
         inst = setmetatable(inst, clazz)
         inst:ctor(...)

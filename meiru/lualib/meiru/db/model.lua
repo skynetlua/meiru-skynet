@@ -113,6 +113,7 @@ end
 
 
 local platform = include(".util.platform", ...)
+local warn_msg = "对象方法调用，请使用:，不能使用."
 
 return function(tblName, db)
 	local database = db or database_default
@@ -128,7 +129,7 @@ return function(tblName, db)
 	end
 
 	function Model:commit()
-		assert(getmetatable(self) == Model)
+		assert(getmetatable(self) == Model, warn_msg)
 		if self.id then
 			self.update_at = os.time()
 		else
@@ -154,7 +155,7 @@ return function(tblName, db)
 	end
 
 	function Model:save(...)
-		assert(getmetatable(self) == Model)
+		assert(getmetatable(self) == Model, warn_msg)
 		assert(type(self.id) == 'number')
 		self.update_at = os.time()
 		local fields = {...}
@@ -174,7 +175,7 @@ return function(tblName, db)
 	end
 
 	function Model:dusting()
-		assert(getmetatable(self) == Model)
+		assert(getmetatable(self) == Model, warn_msg)
 		local fields = Model.get_fields()
 		for k,v in pairs(self) do
 			if type(v) == 'function' then
@@ -190,7 +191,7 @@ return function(tblName, db)
 	end
 
 	function Model:snapshot()
-		assert(getmetatable(self) == Model)
+		assert(getmetatable(self) == Model, warn_msg)
 		local fields = Model.get_fields()
 		local data = {}
 		for k,v in pairs(self) do

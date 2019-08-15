@@ -17,8 +17,8 @@ local function save_data_to_cache(sessionid, session)
     cached.set(sessionid, session)
 end
 
-
 local function session_create(req, sessionid)
+    -- log("session_create sessionid =", sessionid)
     local session = {
         sessionid = sessionid,
         create_at = os.time(),
@@ -40,7 +40,7 @@ end
 local function session_load(sessionid)
     local session = get_data_from_cache(sessionid)
     if session and session.sessionid == sessionid then
-        if not session.cookies or os.time() > session.cookies.Expires then
+        if not session.cookie or os.time() > session.cookie.Expires then
             session = nil
         end
     else
@@ -58,9 +58,6 @@ return function(req, res)
         local sessionid = req.get_signcookie(kMSessionKey)
         if not sessionid then
             sessionid = uuid()
-            log("Session new sessionid =", sessionid)
-        else
-            log("Session old sessionid =", sessionid)
         end
         self.sessionid = sessionid
         local session = session_load(sessionid)
@@ -69,15 +66,20 @@ return function(req, res)
                 -- log("session useragent change")
                 -- log("session req.get('user-agent') =", req.get('user-agent'))
                 -- log("session session.useragent =", session.useragent)
+                session = nil
             end
         end
         if not session then
             session = session_create(req, sessionid)
             res.set_cookie(session.cookie)
+
+            self.session = session
+            session.update_at = os.time()
+            self.save_session()
+        else
+            self.session = session
+            session.update_at = os.time()
         end
-        session.update_at = os.time()
-        self.session = session
-        self.save_session()
     end
 
     function Session.set(key, val)
@@ -86,7 +88,8 @@ return function(req, res)
     end
 
     function Session.get(key)
-        return self.session[key]
+        local val = self.session[key]
+        return val
     end
 
     function Session.save_session()

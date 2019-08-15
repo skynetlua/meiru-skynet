@@ -49,9 +49,13 @@ function Dispatcher:command(name, ...)
 end
 
 function Dispatcher:request(name, proto)
+	assert(name:sub(#name-2) == "req")
 	local request = self.requests[name]
 	if request then
-		request(self.user, proto)
+		local ret = request(self.user, proto)
+		if ret then
+			self.user:send(name:sub(1, #name-3).."res", ret)
+		end
 	else
 		log("Dispatcher:dispatch_request not implement:", name)
 	end

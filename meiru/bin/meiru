@@ -4,6 +4,7 @@
 BIN_DIR=$(cd "$(dirname "$0")";pwd)
 #工作目录
 WORK_SPACE=$(pwd)
+SCRIPT=${0}
 
 #项目配置文件
 CONFIG_FILE=${1}
@@ -109,6 +110,13 @@ check_arg(){
 }
 
 start(){
+	if [ ! -f $(dirname "${BIN_DIR}")/skynet/skynet ];then
+		echo "需要编译后，才能运行"
+		echo "先配置，执行命令:${SCRIPT} setup"
+		echo "再编译，执行命令:${SCRIPT} build"
+		echo "若编译错误，尝试执行命令:${SCRIPT} clean"
+		exit
+	fi
 	check_arg ${@}
 	LOGGER=$(grep logger ${CONFIG_FILE}|grep -v "\-\-logger")
 	if [[ ! -z ${LOGGER} ]]; then

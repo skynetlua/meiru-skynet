@@ -15,7 +15,7 @@ if have_mysql then
 end
 
 --执行
-local kMDoSaveInterval = 10
+local kMDoSaveInterval = 5
 --缓存时间低于给定时间，不写入数据库
 local kMTmpSaveIntervel = 60*10
 --最大缓存容量

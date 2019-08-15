@@ -1,6 +1,8 @@
 local skynet = require "skynet"
 local crypt  = require "skynet.crypt"
 local socket = require "skynet.socket"
+local sockethelper = require "http.sockethelper"
+local socket_error = sockethelper.socket_error
 
 local string = string
 
@@ -171,7 +173,7 @@ function WebSocket:start()
     local ok, err = xpcall(WebSocket.resolve_accept, debug.traceback, self)
     if not ok then
         if err == socket_error then
-            if closed then
+            if not socket.invalid(self.id) then
                 self:try_handle("close")
             else
                 self:try_handle("error")

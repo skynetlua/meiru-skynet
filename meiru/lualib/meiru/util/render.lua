@@ -168,6 +168,9 @@ return function(get_res, options, mode)
         end
         env.partial = function(path1, env1)
             env1 = env1 or {}
+            for k,v in pairs(env) do
+                env1[k] = v
+            end
             path1 = conv_realpath(path, path1)
             if env1.collection and env1.as then
                 local env2 = {}

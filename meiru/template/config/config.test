@@ -11,4 +11,4 @@ lua_path  = lua_path .. test_path .. "lualib/?.lua;"
 debug = 1
 service_http = "app"
 http_port    = 8080
-service_num  = 4
+service_num  = 1

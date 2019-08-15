@@ -8,7 +8,7 @@ local _queue = PQueue(function(a, b)
 	return b.deadline - a.deadline
 end)
 
-local kMCacheInterval = 60
+local kMCacheInterval = 60*10
 
 local _caches = {}
 local function get_data(key)
@@ -66,6 +66,9 @@ end)
 local function set(key, data, timeout)
 	assert(type(key) == 'string' and #key > 0)
 	set_data(key, data, timeout or 0)
+	if timeout and timeout < kMCacheInterval then
+		return
+	end
 	data = skynet.packstring(data)
 	return skynet.call(_cached, "lua", "set", key, data, timeout)
 end
