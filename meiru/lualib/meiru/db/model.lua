@@ -143,7 +143,13 @@ return function(tblName, db)
 		if self.id then
 			database.update(tblName, self.id, data)
 		else
-			self.id = database.insert(tblName, data)
+			local retval = database.insert(tblName, data)
+			if type(retval) == "number" then
+				self.id = retval
+			else
+				log("Model:commit failed retval =", retval)
+				assert(false)
+			end
 		end
 	end
 

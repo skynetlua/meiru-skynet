@@ -4,8 +4,6 @@ local sockethelper = require "http.sockethelper"
 local httpd        = require "http.httpd"
 
 
-
-
 local SSLCTX_SERVER = nil
 local function gen_interface(protocol, fd)
     if protocol == "http" then

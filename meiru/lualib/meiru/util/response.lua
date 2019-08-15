@@ -23,9 +23,9 @@ return function(app, res)
         rawres     = res,
         statuscode = 200,
         headers    = {},
-        cookies    = {},
+        -- cookies    = {},
         viewdatas  = {},
-        blackboard = {},
+        -- blackboard = {},
         layout = "layout",
     }
     local response = self
@@ -78,23 +78,25 @@ return function(app, res)
         return true
     end
 
-    function response.set_cookie(key, value)
-        -- self.cookies = self.cookies or {}
-        self.cookies[key] = value
-    end
-
-    function response.set_cookies(cookies)
-        for k,v in pairs(cookies) do
-            self.set_cookie(k, v)
+    function response.set_header(key, value, multi)
+        if multi then
+            local values = self.headers[key]
+            if values then
+                if type(values) ~= 'table' then
+                    local tmp = {values}
+                    values = tmp
+                end
+                table.insert(values, value)
+            else
+                self.headers[key] = value
+            end
+        else
+            self.headers[key] = value
         end
     end
 
-    function response.set_header(key, value)
-        self.headers[key] = value
-    end
-
-    function response.set(key, value)
-        self.headers[key] = value
+    function response.set(key, value, multi)
+        response.set_header(key, value, multi)
     end
 
     function response.set_cache_timeout(max_age)
@@ -127,7 +129,6 @@ return function(app, res)
     function response.redirect(url)
         self.statuscode = 302
         self.set_header('Location', url)
-        -- <meta http-equiv="refresh" content="0; url=">
         self.flush()
         return true
     end
@@ -156,12 +157,62 @@ return function(app, res)
         return self.headers
     end
 
-    function response.flush()
-         if self.cookies and next(self.cookies) then
-            if not self.cookies['Domain'] then
-                self.cookies['Domain'] = self.app.get('host') or ""
+    -----------------------------------
+    -- cookie
+    -----------------------------------
+    -- local cookie = {
+    --     key = "cookie_name",
+    --     value = "cookie_value",
+    --     ['Secure'] = true,
+    --     ['HttpOnly'] = true,
+    --     ['Expires'] = "Thurs, 15 Aug 2019 15:59:38 GMT",
+    --     ['Domain'] = "www.skynetlua.com",
+    --     ['Path'] = "/",
+    --     ['max-age'] = 365*24*3600,
+    -- }
+    --example:
+    -- response.set_cookie("cookie_name", "value", "cookie_value")
+    -- response.set_cookie("cookie_name", "max-age", 3600)
+    -- response.set_cookie("cookie_name", "HttpOnly", true)
+    function response.set_cookie(name, key, value)
+        self.cookies = self.cookies or {}
+        if type(name) == 'table' then
+            assert(not key and not value)
+            local cookie = name
+            self.cookies[cookie.key] = cookie
+        else
+            if key == "value" then
+                if not value then
+                    self.cookies[name] = nil
+                else
+                    local cookie = self.cookies[name]
+                    if not cookie then
+                        cookie = {}
+                        self.cookies[name] = cookie
+                    end
+                    cookie.key   = name
+                    cookie.value = value
+                end
+            else
+                local cookie = self.cookies[name]
+                if cookie then
+                    cookie[key] = value
+                end
             end
-            self.set_header('Set-Cookie', Cookie.cookie_encode(self.cookies))
+        end
+    end
+
+    function response.set_cookies(cookies)
+        for _,cookie in pairs(cookies) do
+            self.set_cookie(cookie)
+        end
+    end
+
+    function response.flush()
+         if self.cookies then
+            for _,cookie in pairs(self.cookies) do
+                self.set_header('Set-Cookie', Cookie.cookie_encode(cookie), true)
+            end
         end
         self.set_header('date', os.gmtdate())
         self.is_end = true

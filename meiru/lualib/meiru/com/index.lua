@@ -5,6 +5,7 @@ local names = {
 	"combody", 
 	"comcookie", 
 	"comcsrf",
+	"comcors",
 	"comfinish",
 
 	"comhandle",

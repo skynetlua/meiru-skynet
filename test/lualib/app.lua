@@ -17,7 +17,7 @@ local static_url  = "/"
 ---------------------------------------
 local router = meiru.router()
 
-router.get('/index', function(req, res)
+local func = function(req, res)
     local data = {
         topic = {
             title = "hello elua"
@@ -37,8 +37,11 @@ router.get('/index', function(req, res)
             return "come from helloworld function"
         end
     end
-	res.render('index', data)
-end)
+    res.render('index', data)
+end
+
+router.get('/index', func)
+router.get('/', func)
 
 ---------------------------------------
 --app

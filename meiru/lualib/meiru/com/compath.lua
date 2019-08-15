@@ -12,7 +12,7 @@ end
 
 function ComPath:match(req, res)
     req.path, req.query = url.parse_url(req.rawurl)
-    local idx = string.find(req.path, "/", 1, true)
+    local idx = req.path:find("/", 1, true)
     if idx ~= 1 then
 		return false
 	end

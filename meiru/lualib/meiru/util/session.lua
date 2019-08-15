@@ -1,30 +1,11 @@
 local Cookie = include("cookie", ...)
 local platform = include("platform", ...)
 local cached = include(".db.cached", ...)
+local uuid  = include(".lib.uuid", ...)
 
 local kMSessionKey = "mrsid"
+local kMSessionTimeout = 3600*24*365
 
-
-local function create_session(sessionid, req)
-    local cur_time = os.time()
-    local session = {
-        sessionid = sessionid,
-        referer   = req.get('referer'),
-        create_at = cur_time,
-        req_url   = req.rawurl,
-        vdata = {
-            useragent = req.get('user-agent'),
-        }
-    }
-    local cookies = {
-        Expires = cur_time+3600*24*365,
-        Secure = false,
-        -- HttpOnly = true,
-        Path = "/"
-    }
-    session.cookies = cookies
-    return session
-end
 
 local function get_data_from_cache(sessionid)
     return cached.get(sessionid)
@@ -36,7 +17,27 @@ local function save_data_to_cache(sessionid, session)
     cached.set(sessionid, session)
 end
 
-local function load_session(sessionid)
+
+local function session_create(req, sessionid)
+    local session = {
+        sessionid = sessionid,
+        create_at = os.time(),
+        req_url   = req.rawurl,
+        referer   = req.get('referer'),
+        useragent = req.get('user-agent'),
+    }
+    local cookie = {
+        ['Expires'] = os.time()+kMSessionTimeout,
+        ['max-age'] = kMSessionTimeout
+    }
+    local session_secret = req.app.get("session_secret") or "meiru"
+    cookie.key   = kMSessionKey
+    cookie.value = Cookie.cookie_sign(sessionid, session_secret)
+    session.cookie = cookie
+    return session
+end
+
+local function session_load(sessionid)
     local session = get_data_from_cache(sessionid)
     if session and session.sessionid == sessionid then
         if not session.cookies or os.time() > session.cookies.Expires then
@@ -48,30 +49,31 @@ local function load_session(sessionid)
     return session
 end
 
-return function(req, res, session_secret)
+----------------------------------------------
+----------------------------------------------
+return function(req, res)
     local Session = {}
     local self = Session
-    function Session.ctor(req, res, session_secret)
+    function Session.ctor(req, res)
         local sessionid = req.get_signcookie(kMSessionKey)
-        local is_new
         if not sessionid then
-            sessionid = Cookie.generate_sessionid()
-            is_new = true
+            sessionid = uuid()
+            log("Session new sessionid =", sessionid)
+        else
+            log("Session old sessionid =", sessionid)
         end
         self.sessionid = sessionid
-        local session = load_session(sessionid)
+        local session = session_load(sessionid)
+        if session then
+            if session.useragent ~= req.get('user-agent') then
+                -- log("session useragent change")
+                -- log("session req.get('user-agent') =", req.get('user-agent'))
+                -- log("session session.useragent =", session.useragent)
+            end
+        end
         if not session then
-            session = create_session(sessionid, req)
-            if is_new then
-                session.cookies[kMSessionKey] = Cookie.cookie_sign(sessionid, session_secret)
-                res.set_cookies(session.cookies)
-            end
-        else
-            if session.vdata.useragent ~= req.get('user-agent') then
-                log("session useragent change")
-                log("session req.get('user-agent') =", req.get('user-agent'))
-                log("session session.vdata.useragent =", session.vdata.useragent)
-            end
+            session = session_create(req, sessionid)
+            res.set_cookie(session.cookie)
         end
         session.update_at = os.time()
         self.session = session
@@ -91,32 +93,7 @@ return function(req, res, session_secret)
         save_data_to_cache(self.sessionid, self.session)
     end
 
-    function Session.make_cookie(key, val)
-        local auth_token = tostring(val)
-        res.set_cookie(key, auth_token)
-        local cookies = {
-            Expires = os.time()+3600*24*365,
-            Secure  = false,
-            Path    = "/",
-        }
-        res.set_cookies(cookies)
-    end
-
-    function Session.clear_cookie(key)
-        res.set_cookie(key, "")
-        -- local cookies = {
-        --     Expires  = os.time()+3600*24*365,
-        --     Secure   = false,
-        --     Path     = "/",
-        -- }
-        -- res.set_cookies(cookies)
-    end
-
-    function Session.get_cookie(key)
-        return res.set_cookie(key, "")
-    end
-
-    self.ctor(req, res, session_secret)
+    self.ctor(req, res)
     return self
 end
 

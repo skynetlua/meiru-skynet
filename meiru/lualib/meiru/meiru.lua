@@ -135,6 +135,7 @@ end
 	-- end
 
 function Meiru:dispatch(req, res)
+	-- log("Meiru:dispatch req = ", req)
 	self.is_working = true
 	local ret = self.node_req:dispatch(req, res)
 	-- log("dispatch cost_time =", platform.time() - cur_time)
@@ -171,6 +172,8 @@ function Meiru:default_config()
 	self:add_com("node_start", "ComInit")
 	self:add_com("node_start", "ComPath")
 	self:add_com("node_start", "ComHeader")
+	self:add_com("node_start", "ComCors")
+	self:add_com("node_start", "ComCookie")
 	self:add_com("node_start", "ComSession")
 
 	self:add_com("node_res", "ComRender")

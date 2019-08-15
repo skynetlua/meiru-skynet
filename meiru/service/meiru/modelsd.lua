@@ -231,11 +231,12 @@ function command.insert(mname, data, fupdate)
     if retval.insert_id and retval.insert_id > 0 then
         local key = retval.insert_id
         _models:remove(mname, key)
+        return key
     else
         skynet.log("[modelsd]command.insert retval =", retval)
-        assert(false)
+        -- assert(false)
     end
-    return key
+    return retval
 end
 
 function command.update(mname, key, data, cond)

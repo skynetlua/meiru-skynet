@@ -1,6 +1,6 @@
 local Com = include("com", ...)
-local Cookie = include(".util.cookie", ...)
 local platform = include(".util.platform", ...)
+local uuid  = include(".lib.uuid", ...)
 
 
 local kMCSRFKey = "mrcsrf"
@@ -31,16 +31,16 @@ function ComCSRF:match(req, res)
 			log("ComCSRF header_csrf =", header_csrf, "body_csrf =", body_csrf)
 			return false
 		end
-		local key = header_csrf:sub(1, #header_csrf-8)
-		local val = header_csrf:sub(#header_csrf-8+1)
-		local mac = platform.hmacmd5(key, req.sessionid)
-		mac = mac:sub(1, 8)
-		if val ~= mac then
-			log("ComCSRF sessionid error header_csrf =", header_csrf, "mac =", mac)
-			return false
-		end
+		-- local key = header_csrf:sub(1, #header_csrf-8)
+		-- local val = header_csrf:sub(#header_csrf-8+1)
+		-- local mac = platform.hmacmd5(key, req.sessionid)
+		-- mac = mac:sub(1, 8)
+		-- if val ~= mac then
+		-- 	log("ComCSRF sessionid error header_csrf =", header_csrf, "mac =", mac)
+		-- 	return false
+		-- end
 	end
-	local key = Cookie.generate_sessionid()
+	local key = uuid()
 	local mac = platform.hmacmd5(key, req.sessionid)
 	mac = mac:sub(1, 8)
 	res.res_csrf = key..mac

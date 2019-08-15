@@ -110,10 +110,22 @@ check_arg(){
 
 start(){
 	check_arg ${@}
-
+	LOGGER=$(grep logger ${CONFIG_FILE}|grep -v "\-\-logger")
+	if [[ ! -z ${LOGGER} ]]; then
+		LOGGER=$(echo ${LOGGER} | sed 's/^logger.*=.*"\(.*\)"$/\1/g')
+		mkdir -p $(dirname "${LOGGER}")
+	fi
 	echo "${PROJECT}-${PROGRAM} start ..."
+	PID=$(ps -ef |grep ${CONFIG_FILE}|grep -v grep |awk '{print $2}')
+	if [[ ! -z ${PID} ]]; then
+		echo "${PROJECT}-${PROGRAM} already started"
+		exit
+	fi
+	echo "$(dirname '${BIN_DIR}')/skynet/skynet ${CONFIG_FILE}"
 	$(dirname "${BIN_DIR}")/skynet/skynet ${CONFIG_FILE}
+	echo "DAEMON=${DAEMON}"
 	if [[ ! -z ${DAEMON} ]]; then
+		sleep 1
 		PID=$(ps -ef |grep ${CONFIG_FILE}|grep -v grep |awk '{print $2}')
 		if [[ ! -z ${PID} ]]; then
 			echo "${PROJECT}-${PROGRAM} started, pid:${PID}"
@@ -207,6 +219,8 @@ setup(){
 			setup_ubuntu
 			break
 		fi
+		break
+		echo "Sorry,NO support install program. feedback to github!"
 		checkexist brew
 		if [[ ! -z "${RET}" ]]; then
 			setup_darwin
@@ -270,7 +284,7 @@ case "${1}" in
 	build)build;;
 	clean)clean;;
 	buildpbc)buildpbc;;
-	*)echo "Usage : ${0} start|stop,not ${1}"
+	*)echo "Usage : ${0} start|stop|create|kill|setup|build|clean|buildpbc,not ${1}"
 esac
 
 # automake

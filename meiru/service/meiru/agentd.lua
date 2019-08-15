@@ -17,7 +17,6 @@ local protocol
 local services
 
 local function handle_web_cb(is_ws, ...)
-    -- skynet.error("handle_web_cb is_ws =", is_ws)
     if is_ws then
         assert(ws, "no open ws/wss service")
         local ret = ws.dispatch(...)
@@ -35,7 +34,6 @@ end
 ---------------------------------------------
 local command = {}
 function command.start(data)
-    -- log("agentd data =", data)
     master = data.master
     config = data.config
     services = config.services

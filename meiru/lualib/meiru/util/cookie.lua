@@ -4,30 +4,29 @@ local uuid  = include(".lib.uuid", ...)
 local Coder = include(".role.coder", ...)
 local json  = Coder("json")
 
+local string = string
+local table = table
+
 local Cookie = {}
 
-
-function Cookie.generate_sessionid()
-	return uuid()
-end
 
 local function cookie_check_signed(str, secret)
 	if type(str) ~= "string" then
 		return
 	end
-	if string.sub(str, 1, 2) ~= "s:" then
+	if str:sub(1, 2) ~= "s:" then
 		return
 	end
-	local val = string.sub(str, 3)
-	local idx = string.find(val, "%.", 1, true)
+	local val = str:sub(3)
+	local idx = val:find(".", 1, true)
 	if not idx then
 		return
 	end
-	local key = string.sub(val, 1, idx-1)
-	local checkmac = string.sub(val, idx+1)
-	local mac = platform.hmacmd5(key, secret)
+	local ret = val:sub(1, idx-1)
+	local checkmac = val:sub(idx+1)
+	local mac = platform.hmacmd5(ret, secret)
 	if mac == checkmac then
-		return key
+		return ret
 	end
 end
 
@@ -36,14 +35,12 @@ function Cookie.cookie_sign(val, secret)
 	return "s:".. val.."."..mac
 end
 
-
 local function cookie_signeds(cookies, secret)
-	local dec
 	local signcookies = {}
 	for key,val in pairs(cookies) do
-		dec = cookie_check_signed(val, secret)
-		if dec then
-			signcookies[key] = dec
+		val = cookie_check_signed(val, secret)
+		if val then
+			signcookies[key] = val
 			cookies[key] = nil
 		end
 	end
@@ -54,36 +51,36 @@ local function cookie_check_json(str)
 	if type(str) ~= "string" then
 		return
 	end
-	if string.sub(str, 1, 2) ~= "j:" then
+	if str:sub(1, 2) ~= "j:" then
 		return
 	end
-	local tmp = string.sub(str, 3)
+	local tmp = str:sub(3)
 	return json.decode(tmp)
 end
 
 local function cookie_jsons(cookies)
-	local dec
 	for key,val in pairs(cookies) do
-		dec = cookie_check_json(val)
-		if dec then
-			cookies[key] = dec
+		val = cookie_check_json(val)
+		if val then
+			cookies[key] = val
 		end
 	end
 	return cookies
 end
 
 function Cookie.cookie_decode(txt, secret)
-	local kvpairs = string.split(txt, ";")
+	local kvpairs = txt:split(";")
 	local cookies = {}
+	local key_val, key, val
 	for _,kvpair in ipairs(kvpairs) do
-		local key_val = string.split(kvpair, "=")
+		key_val = kvpair:split("=")
 		if #key_val == 2 then
-			local key = string.trim(key_val[1])
-			local val = string.trim(key_val[2])
-			val = string.urldecode(val)
+			key = key_val[1]:trim()
+			val = key_val[2]:trim()
+			val = val:urldecode()
 			if not cookies[key] then
-				if string.byte(val, 1) == string.byte('"') then
-					val = string.sub(val, 2, #val-1)
+				if val:byte(1) == ('"'):byte() then
+					val = val:sub(2, #val-1)
 				end
 				cookies[key] = val
 			end
@@ -95,50 +92,32 @@ function Cookie.cookie_decode(txt, secret)
 	return cookies, signcookies
 end
 
-function Cookie.cookie_encode(cookies)
-    local values = {}
-    local low_key
-    for k,v in pairs(cookies) do
-        -- Max-Age
-        low_key = string.lower(k)
-        if low_key == 'secure' then
-        elseif low_key == 'httponly' then
-        elseif low_key == 'expires' then
-		elseif low_key == 'domain' then
-		elseif low_key == 'path' then
-        else
-            table.insert(values, k .. '=' .. string.urlencode(v))
-        end
-    end
-    for k,v in pairs(cookies) do
-        low_key = string.lower(k)
-        if low_key == 'secure' then
-            if v then
-                table.insert(values, 'Secure')
-            end
-        elseif low_key == 'httponly' then
-            if v then
-                table.insert(values, 'HttpOnly')
-            end
-        elseif low_key == 'expires'  then
-            if type(v) == "number" then
+function Cookie.cookie_encode(cookie)
+	local values = {}
+	table.insert(values, cookie.key..'='..(cookie.value or ""))
+    local field
+    for k,v in pairs(cookie) do
+        field = k:lower()
+        if field == 'secure' then
+            table.insert(values, 'Secure')
+        elseif field == 'httponly' then
+        	table.insert(values, 'HttpOnly')
+        elseif field == 'expires' then
+        	if type(v) == "number" then
                 table.insert(values, 'Expires=' .. os.gmtdate(v))
             else
                 table.insert(values, 'Expires=' .. v)
             end
-        elseif low_key == 'domain' then
+		elseif field == 'domain' then
 			table.insert(values, 'Domain=' .. v)
-		elseif low_key == 'path' then
-            table.insert(values, 'Path=' .. v)
-        else
+		elseif field == 'path' then
+			table.insert(values, 'Path=' .. v)
+		elseif field == 'max-age' then
+			table.insert(values, 'max-age=' .. v)
         end
     end
 	return table.concat(values, ";")
 end
-
-
-
-
 
 return Cookie
 

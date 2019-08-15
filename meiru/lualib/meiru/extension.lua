@@ -411,9 +411,7 @@ end
 local ok, skynet = pcall(require, "skynet")
 skynet = ok and skynet
 local class_map = {}
-local alive_map = {
-    open = (os.mode == "dev")
-}
+local alive_map = {}
 
 local function __tostring(...)
     local len = select('#', ...)
@@ -478,8 +476,7 @@ function class(cname, super)
     end
     function clazz.new(...)
         local inst = {}
-        if alive_map.open then
-            -- inst.__traceback = debug.traceback(nil,nil,2)
+        if os.mode == "dev" then
             local date_key = os.date("%x %H:%M")
             local map = alive_map[date_key]
             if not map then
@@ -487,7 +484,9 @@ function class(cname, super)
                 map = alive_map[date_key]
                 setmetatable(map, {__mode = "kv"})
             end
-            map[inst]  = __tostring(...) or ""
+            map[inst] = clazz.__cname .."(" .. (__tostring(...) or "")..")"
+            -- local info = debug.getinfo(3)
+            -- map[inst]  = info.short_src.. ":"..info.currentline ..":" .. clazz.__cname .."(" .. (__tostring(...) or "")..")"
         end
         inst = setmetatable(inst, clazz)
         inst:ctor(...)
@@ -539,11 +538,9 @@ function dump_memory()
     local ret = string.format("lua已用内存:%sKB=>%sKB", lua_mem1, lua_mem2) .. "\n活跃对象实例:"
     local rets = {ret}
     for key, map in pairs(alive_map) do
-        if key ~= "open" then
-            table.insert(rets, "创建时间：" .. key)
-            for inst, params in pairs(map) do
-                table.insert(rets, "instance:".. inst.__cname.."(" .. params ..")") --.. (inst.__traceback or ""))
-            end
+        table.insert(rets, "创建时间：" .. key)
+        for inst, params in pairs(map) do
+            table.insert(rets, "instance:".. params) --.. (inst.__traceback or ""))
         end
     end
     return table.concat(rets, "\n")

@@ -10,7 +10,7 @@ function ComBody:match(req, res)
 	if type(content_type) ~= 'string' then
 		return
 	end
-	local ret = content_type:find('application/x%-www%-form%-urlencoded', 1, true)
+	local ret = content_type:find('application/x-www-form-urlencoded', 1, true)
 	if ret and type(req.rawbody) == 'string' then
 		local tmp = req.rawbody:urldecode()
 		local items = tmp:split("&")

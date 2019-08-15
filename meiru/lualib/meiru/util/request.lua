@@ -4,6 +4,7 @@ return function(app, req)
     local self = {
         app       = app,
         rawreq    = req,
+        ip        = req.ip,
         rawmethod = req.method,
         rawbody   = req.body,
         rawurl    = req.url or "/",
@@ -13,9 +14,6 @@ return function(app, req)
     }
     local request =  self
 
-    -- setmetatable(request, {__index = function(t, k, v)
-    --     log("request k =", k, "v =", v)
-    -- end})
 
     function request.get(key)
         if self.headers then
@@ -24,6 +22,9 @@ return function(app, req)
         return self.rawheaders[key]
     end
 
+    -----------------------------------
+    -- cookie
+    -----------------------------------
     function request.get_cookie(key)
         if not self.cookies then
             return
@@ -38,6 +39,9 @@ return function(app, req)
         return self.signcookies[key]
     end
     
+    -----------------------------------
+    -- csrf
+    -----------------------------------
     function request.get_body_csrf()
         return self.body and self.body._csrf
     end

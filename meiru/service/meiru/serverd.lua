@@ -5,12 +5,14 @@ local socket = require "skynet.socket"
 local table  = table
 local string = string
 
+--每个IP，每秒钟，可以访问次数
+local kMCountPerIpPerSecond = 30
 
 local listen_fd 
 local slaves  = {}
 local balance = 1
 
-local usersmap   = {}
+local clientsmap = {}
 local blacklists = {}
 
 ---------------------------------------------
@@ -40,11 +42,11 @@ local function get_slave()
 end
 
 ---------------------------------------------
---User
+--Client
 ---------------------------------------------
-local User = class("User")
+local Client = class("Client")
 
-function User:ctor(ip)
+function Client:ctor(ip)
     self.ip = ip
     local slave = get_slave()
     self.slave = slave
@@ -53,43 +55,46 @@ function User:ctor(ip)
     self.time_anchor = os.time()
 end
 
-function User:is_invalid()
+function Client:is_invalid()
     local curtime = os.time()
     if curtime == self.time_anchor then
-        if self.per_times > 30 then
+        if self.per_times > kMCountPerIpPerSecond then
             return true
         end
         self.per_times = self.per_times+1
     else
         self.per_times = 0
     end
+end
+
+function Client:record_visit_times()
     self.visit_times = self.visit_times+1
-    self.last_visit_time = curtime
-    skynet.error("ip =", self.ip, "visit_times =", self.visit_times)
+    self.last_visit_time = os.time()
+    skynet.error("Client:ip =", self.ip, "visit_times =", self.visit_times)
 end
 
 -----------------------------------------
 -----------------------------------------
-local function get_user(ip)
-    local user = usersmap[ip]
-    if not user then
-        user = User.new(ip)
-        usersmap[ip] = user
+local function get_client(ip)
+    local client = clientsmap[ip]
+    if not client then
+        client = Client.new(ip)
+        clientsmap[ip] = client
     end
-    return user
+    return client
 end
 
-local function user_enter(fd, addr)
+local function client_enter(fd, addr)
     local ip = addr:match("([^:]+)")
     if blacklists[ip] then
         return
     end
-    local user = get_user(ip)
-    if user:is_invalid() then
+    local client = get_client(ip)
+    if client:is_invalid() then
         return
     end
-    -- user:record_visit_times()
-    return user
+    client:record_visit_times()
+    return client
 end
 
 ---------------------------------------------------------------------------
@@ -115,8 +120,6 @@ local function check_services(services)
     return services
 end 
 
-
-
 local command = {}
 function command.start(config)
     assert(not listen_fd)
@@ -133,9 +136,9 @@ function command.start(config)
     listen_fd = socket.listen(host, port)
     skynet.error(string.format("Listening %s://%s:%s", protocol, host, port))
     socket.start(listen_fd, function(fd, addr)
-        local user = user_enter(fd, addr)
-        if user then
-            skynet.send(user.slave.slaveid, "lua", "enter", fd, addr)
+        local client = client_enter(fd, addr)
+        if client then
+            skynet.send(client.slave.slaveid, "lua", "enter", fd, addr)
         else
             socket.close(fd)
         end
@@ -150,10 +153,10 @@ function command.remove_blacklist(ip)
     blacklists[ip] = nil
 end
 
-function command.user_infos()
+function command.client_infos()
     local infos = {}
-    for _,user in pairs(usersmap) do
-        infos[user.ip] = user.visit_times
+    for _,client in pairs(clientsmap) do
+        infos[client.ip] = client.visit_times
     end
     return infos
 end
