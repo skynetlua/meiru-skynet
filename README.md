@@ -15,12 +15,13 @@ meiru是一个功能强大，同时支持10万链接，并且业务逻辑支持�
 4. 使用lua协程，避免有任何回调函数，让代码优美简洁。（node到处都是回调函数）
 5. 无性能瓶颈，底层使用C语言实现，最大限度发挥硬件的能力。json等大量消耗计算的模块使用c实现。
 6. 依托于skynet，拥有强大的稳定性和容错能力。只要内存不满，skynet可以持续运行数年而不会进程闪退。
-7. meiru设计了多个调试工具，让你轻松分析错误。
+7. meiru设计了大量的错误处理机制，在debug模式下，能让你轻松分析错误。
 8. lua是一门简单的嵌入式语言，加上使用简单的skynet，大幅降低开发门槛。
+9. meiru不引入其他第三方库，追求使用最少量的代码实现复杂功能。组件设计，让你在开发中无拘无束。
 
 ## 快速使用
 推荐在centos7系统运行
-目前适配的系统：centos7,ubuntu。其他系统尚未适配过。
+目前适配的系统：centos7,ubuntu,macox。其他系统尚未适配过。
 
 centos7安装git工具
 ```
@@ -236,9 +237,11 @@ service //存放启动服务脚本文件
 
 **例子**
 meiru是根项目，test需要导入meiru项目。需要在配置文件`test/config/config.common`导入
+
 ```
 include "../../meiru/config/config.header"
 ```
+
 配置文件是一个lua文件，字段只支持string和数字等。
 在程序中可以通过`local xxx = skynet.getenv("xxx")`读取它的值。
 
@@ -254,10 +257,9 @@ luaservice = luaservice .. test_path .. "service/?.lua;"
 ### 服务调用示例
 通过meiru/serverd服务启动
 ```
-	--创建meiru/serverd服务
-	local httpd = skynet.newservice("meiru/serverd")
-
-	--指定启动参数
+    --创建meiru/serverd服务
+    local httpd = skynet.newservice("meiru/serverd")
+    --指定启动参数
     local param = {
         port = skynet.getenv("httpport"), --(不指定端口，就默认80端口)
         services = {          --(指定服务类型，及其对应的回调文件(共四种http/https/ws/wss))
@@ -270,20 +272,26 @@ luaservice = luaservice .. test_path .. "service/?.lua;"
 ```
 
 services参数配置有四种方式，有两组搭配
+
 services = {
 	['http'] = "web", 
 	['ws'] = "ws", 
 }
+
 services = {
 	['https'] = "web", 
 	['wss'] = "ws", 
 }
+
 两组不能混合。
+
 也就是开启了http模式，不能同时指定https模式
+
 web表示回调文件`项目名/lualib/web.lua`
 ws表示回调文件`项目名/lualib/ws.lua`
 
 回调文件需要支持这个接口
+
 ```
 local ws = {}
 function ws.dispatch(req, res)
@@ -291,6 +299,7 @@ end
 return ws
 ```
 尽管http和websocket是同一端口80，agentd服务会自动判断请求模式，确定是http请求还是websocket
+
 如果是http请求，就会调用`['http'] = "web"` 指定的文件。
 如果是websocket，就会调用`['ws'] = "ws"` 指定的文件。
 
