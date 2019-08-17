@@ -104,58 +104,115 @@ function Meiru:run()
 	-- self.node_root:print()
 end
 
-	-- function application.dispatch(raw_req, raw_res)
-	--     log("application:dispatch raw_req.path =", raw_req.path)
-	--    	log("application:dispatch raw_req.headers =", raw_req.headers)
-	--   	log("application:dispatch raw_req.body =", raw_req.body)
-	-- 	local req = request(self, raw_req)
-	-- 	local res = response(self, raw_res)
-	-- 	local errmsg
-	-- 	local function catch_error(msg)
-	-- 		errmsg = msg.."\n"..debug.traceback()
-	-- 		log(errmsg)
-	-- 	end
-	-- 	local ok, ret = xpcall(self.node_req.dispatch, catch_error, self.node_req, req, res)
-	-- 	if ok then
-	-- 		res.req_ret = res.is_end or ret
-	-- 		res.is_end = nil
-	-- 		ok, ret = xpcall(self.node_res.dispatch, catch_error, self.node_res, req, res)
-	-- 		if not ok then
-	-- 			self.response(raw_res, 404, errmsg)
-	-- 		else
-	-- 			if ret == nil then
-	-- 				self.response(raw_res, 404, "HelloWorld404")
-	-- 			else
-	-- 				assert(false)
-	-- 			end
-	-- 		end
-	-- 	else
-	-- 		self.response(raw_res, 404, errmsg)
-	-- 	end
-	-- end
-
+if os.mode == 'dev' then
+local LineChars = "\n--------------------------------------\n"
 function Meiru:dispatch(req, res)
-	-- log("Meiru:dispatch req = ", req)
 	self.is_working = true
-	local ret = self.node_req:dispatch(req, res)
-	-- log("dispatch cost_time =", platform.time() - cur_time)
-	-- local cur_time1 = platform.time()
-	-- self.node_req:footprint()
-	res.req_ret = res.is_end or ret
-	res.is_end = nil
-	ret = self.node_res:dispatch(req, res)
-	-- self.node_res:footprint()
-	-- log("render cost_time =", platform.time() - cur_time1)
-	if ret == nil then
-		assert(self.is_working)
-		self:response(res, 404, "HelloWorld404")
+	local start_time = platform.time()
+	local errmsg
+	local function catch_error(msg)
+		errmsg = LineChars.."ERROR"..LineChars..msg.."\n"..debug.traceback()
+	end
+	local ok, ret = xpcall(self.node_req.dispatch, catch_error, self.node_req, req, res)
+	if ok then
+		res.req_ret = res.is_end or ret
+		res.is_end = nil
+		ok, ret = xpcall(self.node_res.dispatch, catch_error, self.node_res, req, res)
+	end
+	if ok then
+		if self.enable_footprint then
+			log("dispatch url:"..req.rawurl)
+			log("dispatch cost_time:" .. (platform.time() - start_time))
+			log(LineChars.."FOOTPRINT"..LineChars..self.node_req:footprint())
+		end
+		if ret == nil or ret == false then
+			self:response(res, 404, "Forbidden")
+		else
+			assert(ret == true)
+		end
 	else
-		assert(not self.is_working)
+		if req.app.__render_error then
+			local renerror = req.app.__render_error
+			req.app.__render_error = nil
+			errmsg = errmsg..LineChars.."RENDER_ERROR"..LineChars
+			errmsg = errmsg.."Render error:"..renerror.error
+			if renerror.path then
+				errmsg = errmsg.."\nRender path:"..renerror.path
+				errmsg = errmsg.."\nRender chunk:\n"..renerror.chunk
+			end
+		end
+		local logmsg
+		if self.enable_footprint then
+			logmsg = "dispatch url:"..req.rawurl
+			logmsg = logmsg .."\ndispatch cost_time:" .. (platform.time() - start_time)
+			logmsg = logmsg ..LineChars.."FOOTPRINT"..LineChars..self.node_req:footprint()
+		end
+		self:response(res, 404, logmsg.."\n"..errmsg, {['content-type'] = "text/plain;charset=utf-8"})
 	end
 end
+end
 
-function Meiru:response(res, code, body, headers)
-	res.__response(code, body, headers)
+if os.mode ~= 'dev' then
+local function catch_error(msg)
+	log(msg.."\n"..debug.traceback())
+end
+function Meiru:dispatch(req, res)
+	self.is_working = true
+	local start_time = platform.time()
+	local ok, ret = xpcall(self.node_req.dispatch, catch_error, self.node_req, req, res)
+	if ok then
+		res.req_ret = res.is_end or ret
+		res.is_end = nil
+		ok, ret = xpcall(self.node_res.dispatch, catch_error, self.node_res, req, res)
+	end
+	if self.enable_footprint then
+		log("Meiru url:", req.rawurl)
+		log("Meiru cost_time:", platform.time() - start_time)
+		log("Meiru footprint:\n", self.node_req:footprint())
+	end
+	if not ok then
+		self:response(res, 404, "Forbidden")
+	else
+		if ret == nil or ret == false then
+			self:response(res, 404, "Forbidden")
+		else
+			assert(ret == true)
+		end
+	end
+end
+end
+
+-- function Meiru:dispatch(req, res)
+-- 	self.is_working = true
+
+-- 	local start_time = platform.time()
+
+-- 	local ret = self.node_req:dispatch(req, res)
+-- 	res.req_ret = res.is_end or ret
+-- 	res.is_end = nil
+-- 	ret = self.node_res:dispatch(req, res)
+
+-- 	if self.enable_footprint then
+-- 		log("Meiru url:", req.rawurl)
+-- 		log("Meiru cost_time:", platform.time() - start_time)
+-- 		log("\n", self.node_req:footprint())
+-- 	end
+
+-- 	if ret == nil then
+-- 		assert(self.is_working)
+-- 		self:response(res, 404, "HelloWorld404")
+-- 	else
+-- 		assert(not self.is_working)
+-- 	end
+-- end
+
+function Meiru:open_footprint(enable)
+	enable = type(enable) ~= 'nil' and enable or true
+	self.enable_footprint = enable
+end
+
+function Meiru:response(res, code, body, header)
+	res.__response(code, body, header)
 	self.is_working = nil
 end
 
@@ -258,6 +315,10 @@ function exports.create_app()
 		meiru:response(...)
 	end
 
+	function app.open_footprint(enable)
+		meiru:open_footprint(enable)
+	end
+	
 	function app.footprint()
 		return meiru:footprint()
 	end
@@ -267,16 +328,16 @@ function exports.create_app()
 	end
 
 	function app.chunkprint()
-		assert(os.mode == 'dev', "Please open development mode.just os.mode = 'dev'")
-		local chunk = ""
-		if app.__chunks then
-			for _,v in ipairs(app.__chunks) do
-				chunk = chunk .."ejs:[["..v[1].."]]\n"..v[2].."\n"
-			end
-		end
-		return chunk
+		assert(false, "discard")
+		-- assert(os.mode == 'dev', "Please open development mode.just setting os.mode = 'dev'")
+		-- local chunk = ""
+		-- if app.__chunks then
+		-- 	for _,v in ipairs(app.__chunks) do
+		-- 		chunk = chunk .."ejs:[["..v[1].."]]\n"..v[2].."\n"
+		-- 	end
+		-- end
+		-- return chunk
 	end
-
 	------------------------------
 	-----------------------------
 	meiru:default_config()

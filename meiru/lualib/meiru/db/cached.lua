@@ -8,7 +8,7 @@ local _queue = PQueue(function(a, b)
 	return b.deadline - a.deadline
 end)
 
-local kMCacheInterval = 60*10
+local kMCacheInterval = 60*10+1
 
 local _caches = {}
 local function get_data(key)

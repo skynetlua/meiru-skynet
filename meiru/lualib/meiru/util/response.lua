@@ -22,16 +22,14 @@ return function(app, res)
         app        = app,
         rawres     = res,
         statuscode = 200,
-        headers    = {},
-        -- cookies    = {},
-        viewdatas  = {},
-        -- blackboard = {},
-        layout = "layout",
+        header     = {},
+        viewdata   = {},
+        layout     = "layout",
     }
     local response = self
 
     function response.render(view, option)
-        local data = self.viewdatas
+        local data = self.viewdata
         if option then
             for k,v in pairs(option) do
                 data[k] = v
@@ -46,15 +44,6 @@ return function(app, res)
         return true
     end
 
-    function response.render404(body)
-        self.set_type('txt')
-        self.send(404, body)
-    end
-
-    function response.renderError(body, code)
-        self.send(code, body)
-    end
-
     function response.get_layout()
         return self.layout
     end
@@ -64,7 +53,7 @@ return function(app, res)
     end
 
     function response.data(key, value)
-        self.viewdatas[key] = value
+        self.viewdata[key] = value
     end
 
     function response.send(code, body)
@@ -80,7 +69,7 @@ return function(app, res)
 
     function response.set_header(key, value, multi)
         if multi then
-            local values = self.headers[key]
+            local values = self.header[key]
             if values then
                 if type(values) ~= 'table' then
                     local tmp = {values}
@@ -88,10 +77,10 @@ return function(app, res)
                 end
                 table.insert(values, value)
             else
-                self.headers[key] = value
+                self.header[key] = value
             end
         else
-            self.headers[key] = value
+            self.header[key] = value
         end
     end
 
@@ -123,7 +112,6 @@ return function(app, res)
         end
         assert(content_type, "response.set_type:"..ctype)
         self.set_header('content-type', content_type..";charset=utf-8")
-        -- 
     end
 
     function response.redirect(url)
@@ -153,8 +141,8 @@ return function(app, res)
         return self.body
     end
 
-    function response.get_headers()
-        return self.headers
+    function response.get_header()
+        return self.header
     end
 
     -----------------------------------
@@ -218,8 +206,8 @@ return function(app, res)
         self.is_end = true
     end
 
-    function response.__response(code, body, headers)
-        self.rawres.response(code, body, headers)
+    function response.__response(code, body, header)
+        self.rawres.response(code, body, header)
     end
 
     return response

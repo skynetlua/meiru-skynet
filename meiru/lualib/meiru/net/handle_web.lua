@@ -46,12 +46,12 @@ local function do_request(fd, addr, protocol, handle)
     if interface.init then
         interface.init()
     end
-    local code, url, method, headers, body = httpd.read_request(interface.read, 8192)
+    local code, url, method, header, body = httpd.read_request(interface.read, 8192)
     if code then
         if code ~= 200 then
             do_response(fd, interface.write, code)
         else
-            if headers.upgrade == "websocket" and method:lower() ~= "get" then
+            if header.upgrade == "websocket" and method:lower() ~= "get" then
                 do_response(fd, interface.write, 400, "need GET method")
             else
                 local ip = addr:match("([^:]+)")
@@ -61,18 +61,17 @@ local function do_request(fd, addr, protocol, handle)
                     protocol = protocol,
                     method   = method,
                     url      = url,
-                    headers  = headers,
+                    header   = header,
                     body     = body,
-                    -- addr     = addr,
                     ip       = ip,
                 }
                 local res = {
                     interface = interface,
-                    response = function(code, bodyfunc, headers)
-                        do_response(fd, interface.write, code, bodyfunc, headers)
+                    response = function(code, bodyfunc, header)
+                        do_response(fd, interface.write, code, bodyfunc, header)
                     end
                 }
-                local ret = handle(headers.upgrade == "websocket", req, res)
+                local ret = handle(header.upgrade == "websocket", req, res)
                 if ret then
                     return
                 end

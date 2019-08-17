@@ -236,6 +236,7 @@ end
 local command = {}
 
 function command.get(ckey)
+    -- log("command.get ckey =", ckey)
     assert(ckey)
     local vdata, deadline = _cache:get(ckey)
     return vdata, deadline
@@ -247,6 +248,7 @@ function command.remove(ckey)
 end
 
 function command.set(ckey, vdata, timeout)
+    -- log("command.set ckey =", ckey)
     assert(ckey)
     assert(type(vdata) == "string", "need vdata = skynet.packstring(vdata)")
     return _cache:set(ckey, vdata, timeout)

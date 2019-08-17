@@ -193,6 +193,7 @@ function command.update(tblname, data, cond)
     if retval.errno then
         skynet.error("[MYSQLDBD]update sql:",sql)
         skynet.error("[MYSQLDBD]发生错误 errno:",retval.errno,",err:",retval.err)
+        assert(false)
     end
     return retval
 end
@@ -237,6 +238,8 @@ function command.insert(tblname, data, fupdate)
                 cond = "WHERE `".. key.. "`='".. value.. "'"
             end
             return command.update(tblname, data, cond)
+        else
+            assert(false)
         end
     end
     return retval
@@ -249,6 +252,7 @@ function command.delete(tblname, id)
     if retval.errno then
         skynet.error("[MYSQLDBD]insert sql:",sql)
         skynet.error("[MYSQLDBD]发生错误 errno:",retval.errno,",err:",retval.err)
+        assert(false)
     end
     return retval
 end
@@ -259,6 +263,7 @@ function command.distinct(tblname, field)
     if retval.errno then
         skynet.error("[MYSQL]select sql:",sql)
         skynet.error("[MYSQL]发生错误 errno:",retval.errno,",err:",retval.err)
+        assert(false)
     else
         if #retval>0 then
             local table_desc = table_descs[tblname]

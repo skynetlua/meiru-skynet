@@ -1,5 +1,8 @@
 local Com = include("com", ...)
 
+----------------------------------------------
+--ComHeader
+----------------------------------------------
 local ComHeader = class("ComHeader", Com)
 
 function ComHeader:ctor()
@@ -7,15 +10,15 @@ function ComHeader:ctor()
 end
 
 function ComHeader:match(req, res)
-	local headers = {}
-	for k,v in pairs(req.rawheaders) do
+	local header = {}
+	for k,v in pairs(req.rawheader) do
 		k = string.lower(k)
 		if k == 'user-agent' or k == 'content-type' then
 			v = string.lower(v)
 		end
-		headers[k] = v
+		header[k] = v
 	end
-	req.headers = headers
+	req.header = header
 end
 
 return ComHeader

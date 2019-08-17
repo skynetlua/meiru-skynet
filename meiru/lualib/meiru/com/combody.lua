@@ -1,12 +1,16 @@
 local Com = include("com", ...)
 
+
+----------------------------------------------
+--ComBody
+----------------------------------------------
 local ComBody = class("ComBody", Com)
 
 function ComBody:ctor()
 end
 
 function ComBody:match(req, res)
-	local content_type = req.headers['content-type']
+	local content_type = req.header['content-type']
 	if type(content_type) ~= 'string' then
 		return
 	end

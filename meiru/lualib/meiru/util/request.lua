@@ -8,18 +8,17 @@ return function(app, req)
         rawmethod = req.method,
         rawbody   = req.body,
         rawurl    = req.url or "/",
-        rawheaders= req.headers or {},
+        rawheader = req.header or {},
         method    = string.lower(req.method) or "get",
         -- path      = req.path or "/",
     }
     local request =  self
 
-
     function request.get(key)
-        if self.headers then
-            return self.headers[key]
+        if self.header then
+            return self.header[key]
         end
-        return self.rawheaders[key]
+        return self.rawheader[key]
     end
 
     -----------------------------------
@@ -48,10 +47,10 @@ return function(app, req)
 
     function request.get_header_csrf()
         local check_csrf = (self.query and self.query._csrf)
-            or self.headers['csrf-token']
-            or self.headers['xsrf-token']
-            or self.headers['x-csrf-token']
-            or self.headers['x-xsrf-token']
+            or self.header['csrf-token']
+            or self.header['xsrf-token']
+            or self.header['x-csrf-token']
+            or self.header['x-xsrf-token']
         return check_csrf
     end
     return request

@@ -131,8 +131,8 @@ start(){
 	fi
 	echo "$(dirname '${BIN_DIR}')/skynet/skynet ${CONFIG_FILE}"
 	$(dirname "${BIN_DIR}")/skynet/skynet ${CONFIG_FILE}
-	echo "DAEMON=${DAEMON}"
 	if [[ ! -z ${DAEMON} ]]; then
+		echo "DAEMON=${DAEMON}"
 		sleep 1
 		PID=$(ps -ef |grep ${CONFIG_FILE}|grep -v grep |awk '{print $2}')
 		if [[ ! -z ${PID} ]]; then

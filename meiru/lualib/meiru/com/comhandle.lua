@@ -1,5 +1,8 @@
 local Com = include("com", ...)
 
+----------------------------------------------
+--ComHandle
+----------------------------------------------
 local ComHandle = class("ComHandle", Com)
 
 function ComHandle:ctor(handle)

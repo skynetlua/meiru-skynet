@@ -50,16 +50,30 @@ local app = meiru.create_app()
 app.set("views_path", views_path)
 app.set("static_url", static_url)
 app.set("session_secret", "meiru")
-app.use(meiru.static('/public', static_path))
 
+--配置viewdata，方便在view elua中访问数据
 app.data("config", config)
 
+--静态资源路由
+app.use(meiru.static('/public', static_path))
+
+--动态网页路由
 app.use(router.node())
+
+--什么都找不到，就路由静态资源
+app.use(meiru.static('/', static_path))
+
+--打开浏览器访问足迹
+app.open_footprint()
+
+--运行
 app.run()
 
+--把所有的路由树打印出来
 local tree = app.treeprint()
 log("treeprint\n", tree)
 
+--打印所有的对象
 local memory_info = dump_memory()
 log("memory_info\n", memory_info)
 

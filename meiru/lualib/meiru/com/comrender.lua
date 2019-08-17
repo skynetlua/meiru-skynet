@@ -37,12 +37,22 @@ function ComRender:match(req, res)
 		local csrf = res.res_csrf
 		local data = res.render_params.data or {}
 		data.csrf = csrf
-		local body, chunks = render(res.render_params.view, data)
-        req.app.__chunks = chunks
+
+		local ok, body = render(res.render_params.view, data)
+        if not ok then
+            req.app.__render_error = body
+            assert(false)
+            return false
+        end
 		local layout = res.get_layout()
 		if layout and #layout > 0 then
 			data.body = body
-    		res.body = render(layout, data)
+    		ok, res.body = render(layout, data)
+            if not ok then
+                req.app.__render_error = body
+                assert(false)
+                return false
+            end
     	else
     		res.body = body
     	end

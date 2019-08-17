@@ -64,13 +64,13 @@ local req = {
     protocol = 'http',
     method   = "get",
     url      = "/index",
-    headers  = {},
+    header  = {},
     body     = "",
 }
 
 local res = {
-    response = function(code, bodyfunc, headers)
-        log("response", code, headers)
+    response = function(code, bodyfunc, header)
+        log("response", code, header)
     end,
 }
 

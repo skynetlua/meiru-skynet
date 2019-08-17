@@ -85,7 +85,7 @@ local function load_chunk(content)
     return {chunk = chunk, __args = __args}
 end
 
-local queue_map = QueueMap(500)
+local queue_map = QueueMap(300)
 local function get_chunk(path, get_res, mode)
     if mode then
         local file_txt = get_res(path)
@@ -123,15 +123,13 @@ end
 
 ----------------------------------------
 --mode == nil, open cache
---mode == 1, just close cache
---mode == 2, close cache and return chunk list
+--mode == 1, just closest cache
 return function(get_res, options, mode)
     local _GEnv = {print = print,type = type,table = table,ipairs = ipairs,log = log,
         pairs = pairs,math = math,string = string,markdown = markdown,widget = widget}
     for k,v in pairs(options) do
         _GEnv[k] = v
     end
-    local chunk_list
     local last_chunk
     local chunk_path
     local Render = false
@@ -143,9 +141,6 @@ return function(get_res, options, mode)
         end
         chunk_path = path
         last_chunk = chunk
-        if mode == 2 then
-            table.insert(chunk_list,{path, chunk.chunk})
-        end
         local env = {}
         if data then
             for k,v in pairs(data) do
@@ -168,12 +163,12 @@ return function(get_res, options, mode)
         end
         env.partial = function(path1, env1)
             env1 = env1 or {}
-            for k,v in pairs(env) do
-                env1[k] = v
-            end
             path1 = conv_realpath(path, path1)
             if env1.collection and env1.as then
                 local env2 = {}
+                for k,v in pairs(env) do
+                    env2[k] = v
+                end
                 local items = ""
                 for idx,item in ipairs(env1.collection) do
                     env2[env1.as] = item
@@ -181,6 +176,9 @@ return function(get_res, options, mode)
                     items = items.. Render(path1, env2)
                 end
                 return items
+            end
+            for k,v in pairs(env) do
+                env1[k] = v
             end
             return Render(path1, env1)
         end
@@ -192,24 +190,20 @@ return function(get_res, options, mode)
     end
 
     return function(...)
-        if mode == 2 then
-            chunk_list = {}
-        end
         last_chunk = nil
-        local ok, ret = xpcall(Render,debug.traceback, ...)
-        -- local ret = Render(...)
+        local ok, ret = pcall(Render, ...)
         if not ok then
-            log(ret)
             if last_chunk then
                 log("*********Error chunk info***********")
+                log("[Render]error:", ret)
                 log("[Render]path:", chunk_path)
-                log("[Render]chunk:", last_chunk.chunk)
+                log("[Render]chunk:\n", last_chunk.chunk)
+                return ok, {error = ret, path = chunk_path, chunk = last_chunk.chunk}
+            else
+                return ok, {error = ret}
             end
             assert(false)
         end
-        if mode == 2 then
-            return ret, chunk_list
-        end
-        return ret
+        return true, ret
     end
 end

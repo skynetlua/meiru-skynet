@@ -1,5 +1,8 @@
 local Com = include("com", ...)
 
+----------------------------------------------
+--ComFinish
+----------------------------------------------
 local ComFinish = class("ComFinish", Com)
 
 function ComFinish:ctor()

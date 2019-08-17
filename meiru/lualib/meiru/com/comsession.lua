@@ -2,7 +2,9 @@ local Com = include("com", ...)
 local Cookie = include(".util.cookie", ...)
 local Session = include(".util.session", ...)
 
-
+----------------------------------------------
+--ComSession
+----------------------------------------------
 local ComSession = class("ComSession", Com)
 
 function ComSession:ctor()

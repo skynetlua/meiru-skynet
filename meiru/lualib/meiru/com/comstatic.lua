@@ -4,6 +4,9 @@ local filed = include(".lib.filed", ...)
 
 local string = string
 
+----------------------------------------------
+--ComStatic
+----------------------------------------------
 local ComStatic = class("ComStatic", Com)
 
 function ComStatic:ctor(static_dir)
@@ -41,12 +44,9 @@ function ComStatic:get_full_path(path)
 end
 
 function ComStatic:match(req, res)
-	-- query = {
-	-- 	fv = "f0d1c8f7e4134b6d0d21bc96a86e0bb9",
-	-- },
-    local headers = req.headers
+    local header = req.header
 	local fullpath = self:get_full_path(req.path)
-	local modify_date = headers['if-modified-since']
+	local modify_date = header['if-modified-since']
 	if type(modify_date) == "string" and #modify_date > 0 then
 		local modify_time = os.gmttime(modify_date)
 		if modify_time then
@@ -64,7 +64,7 @@ function ComStatic:match(req, res)
 	if not file_md5 then
 		return false
 	end
-	local etag = headers['if-none-match']
+	local etag = header['if-none-match']
 	if type(etag) == "string" and #etag > 0 then
 		if etag == file_md5 then
 			res.send(304)

@@ -1,5 +1,8 @@
 local Com = include("com", ...)
 
+----------------------------------------------
+--ComInit
+----------------------------------------------
 local ComInit = class("ComInit", Com)
 
 function ComInit:ctor()
