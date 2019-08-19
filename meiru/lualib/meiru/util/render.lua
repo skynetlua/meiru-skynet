@@ -2,7 +2,6 @@ local Markdown = include(".lib.md", ...)
 local widget   = include(".lib.widget", ...)
 local QueueMap = include(".lib.queuemap", ...)
 
-
 local table = table
 
 local white_char = string.byte(" ")
@@ -21,8 +20,20 @@ local function is_empty_txt(txt)
     return true
 end
 
+local __md_cache = QueueMap(300)
 local function markdown(text)
-    return '<div class="markdown-text">' .. Markdown(text or '') .. '</div>'
+    if os.mode == 'dev' then
+        return '<div class="markdown-text">' .. Markdown(text or '') .. '</div>'
+    end
+    if type(text) ~= 'string' then
+        return '<div class="markdown-text"></div>'
+    end
+    local retval = __md_cache.get(text)
+    if not retval then
+        retval = '<div class="markdown-text">' .. Markdown(text) .. '</div>'
+        __md_cache.set(text, retval)
+    end
+    return retval
 end
 
 local function load_chunk(content)
@@ -85,17 +96,17 @@ local function load_chunk(content)
     return {chunk = chunk, __args = __args}
 end
 
-local queue_map = QueueMap(300)
-local function get_chunk(path, get_res, mode)
-    if mode then
+local __queue_map = QueueMap(300)
+local function get_chunk(path, get_res)
+    if os.mode == 'dev' then
         local file_txt = get_res(path)
         return load_chunk(file_txt)
     end
-    local chunk = queue_map.get(path)
+    local chunk = __queue_map.get(path)
     if not chunk then
         local file_txt = get_res(path)
         chunk = load_chunk(file_txt)
-        queue_map.set(path, chunk)
+        __queue_map.set(path, chunk)
     end
     return chunk
 end
@@ -122,9 +133,7 @@ local function conv_realpath(cur_path, path)
 end
 
 ----------------------------------------
---mode == nil, open cache
---mode == 1, just closest cache
-return function(get_res, options, mode)
+return function(get_res, options)
     local _GEnv = {print = print,type = type,table = table,ipairs = ipairs,log = log,
         pairs = pairs,math = math,string = string,markdown = markdown,widget = widget}
     for k,v in pairs(options) do
@@ -134,7 +143,7 @@ return function(get_res, options, mode)
     local chunk_path
     local Render = false
     Render = function(path, data)
-        local chunk = get_chunk(path, get_res, mode)
+        local chunk = get_chunk(path, get_res)
         if not chunk then
             error("Render no find the chunk:"..path)
             return ""

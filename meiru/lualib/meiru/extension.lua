@@ -654,16 +654,26 @@ local function __quick_dump(t, depth)
 end
 
 function table.tostring(...)
-    local strs = {}
+    local strs = ""
     for i = 1, select('#', ...) do
         local v = select(i, ...)
         if type(v) == "table" then
-            table.insert(strs, __quick_dump(v, 0))
+            strs = strs .. __dump(v, 0)
         else
-            table.insert(strs, tostring(v))
+            strs = strs .. (v and tostring(v) or "nil")
         end
     end
-    return table.concat(strs,", ")
+    return strs
+    -- local strs = {}
+    -- for i = 1, select('#', ...) do
+    --     local v = select(i, ...)
+    --     if type(v) == "table" then
+    --         table.insert(strs, __quick_dump(v, 0))
+    --     else
+    --         table.insert(strs, tostring(v))
+    --     end
+    -- end
+    -- return table.concat(strs,", ")
 end
 
 

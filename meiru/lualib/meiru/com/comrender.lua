@@ -28,12 +28,7 @@ end
 function ComRender:match(req, res)
 	if res.render_params then
 		views_path = req.app.get("views_path")
-        local render
-        if os.mode == 'dev' then
-            render = Render(get_res, req.app.get_viewdatas(), 2)
-        else
-            render = Render(get_res, req.app.get_viewdatas())
-        end
+        local render = Render(get_res, req.app.get_viewdatas())
 		local csrf = res.res_csrf
 		local data = res.render_params.data or {}
 		data.csrf = csrf

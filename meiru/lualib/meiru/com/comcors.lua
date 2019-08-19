@@ -12,7 +12,7 @@ end
 function ComCors:match(req, res)
 	local app = req.app
 	if app.get('host') then
-		local host = header['host']
+		local host = req.get('host')
 		if not host then
 			return false
 		end

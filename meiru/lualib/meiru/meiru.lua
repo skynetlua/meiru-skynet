@@ -109,21 +109,17 @@ local LineChars = "\n--------------------------------------\n"
 function Meiru:dispatch(req, res)
 	self.is_working = true
 	local start_time = platform.time()
-	local errmsg
-	local function catch_error(msg)
-		errmsg = LineChars.."ERROR"..LineChars..msg.."\n"..debug.traceback()
-	end
-	local ok, ret = xpcall(self.node_req.dispatch, catch_error, self.node_req, req, res)
+	local ok, ret = pcall(self.node_req.dispatch, self.node_req, req, res)
 	if ok then
 		res.req_ret = res.is_end or ret
 		res.is_end = nil
-		ok, ret = xpcall(self.node_res.dispatch, catch_error, self.node_res, req, res)
+		ok, ret = pcall(self.node_res.dispatch, self.node_res, req, res)
 	end
 	if ok then
 		if self.enable_footprint then
 			log("dispatch url:"..req.rawurl)
 			log("dispatch cost_time:" .. (platform.time() - start_time))
-			log(LineChars.."FOOTPRINT"..LineChars..self.node_req:footprint())
+			log(LineChars.."FOOTPRINT"..LineChars..(self.node_req:footprint() or 'nothing'))
 		end
 		if ret == nil or ret == false then
 			self:response(res, 404, "Forbidden")
@@ -131,6 +127,13 @@ function Meiru:dispatch(req, res)
 			assert(ret == true)
 		end
 	else
+		local logmsg = "Meiru req:"..table.tostring(req.rawreq)
+		if self.enable_footprint then
+			logmsg = logmsg.."\ndispatch url:"..req.rawurl
+			logmsg = logmsg .."\ndispatch cost_time:" .. (platform.time() - start_time)
+			logmsg = logmsg ..LineChars.."FOOTPRINT"..LineChars..(self.node_req:footprint() or 'nothing')
+		end
+		local errmsg = LineChars.."ERROR"..LineChars..(ret or "").."\n"..debug.traceback()
 		if req.app.__render_error then
 			local renerror = req.app.__render_error
 			req.app.__render_error = nil
@@ -141,30 +144,28 @@ function Meiru:dispatch(req, res)
 				errmsg = errmsg.."\nRender chunk:\n"..renerror.chunk
 			end
 		end
-		local logmsg
-		if self.enable_footprint then
-			logmsg = "dispatch url:"..req.rawurl
-			logmsg = logmsg .."\ndispatch cost_time:" .. (platform.time() - start_time)
-			logmsg = logmsg ..LineChars.."FOOTPRINT"..LineChars..self.node_req:footprint()
-		end
+
 		self:response(res, 404, logmsg.."\n"..errmsg, {['content-type'] = "text/plain;charset=utf-8"})
 	end
 end
 end
 
 if os.mode ~= 'dev' then
-local function catch_error(msg)
-	log(msg.."\n"..debug.traceback())
-end
+
 function Meiru:dispatch(req, res)
 	self.is_working = true
 	local start_time = platform.time()
-	local ok, ret = xpcall(self.node_req.dispatch, catch_error, self.node_req, req, res)
+	local ok, ret = pcall(self.node_req.dispatch, self.node_req, req, res)
 	if ok then
 		res.req_ret = res.is_end or ret
 		res.is_end = nil
-		ok, ret = xpcall(self.node_res.dispatch, catch_error, self.node_res, req, res)
+		ok, ret = pcall(self.node_res.dispatch, self.node_res, req, res)
 	end
+	if not ok then
+		log("Meiru req:", req.rawreq)
+		log(ret.."\n"..debug.traceback())
+	end
+
 	if self.enable_footprint then
 		log("Meiru url:", req.rawurl)
 		log("Meiru cost_time:", platform.time() - start_time)
@@ -209,6 +210,7 @@ end
 function Meiru:open_footprint(enable)
 	enable = type(enable) ~= 'nil' and enable or true
 	self.enable_footprint = enable
+	log("开启打印访问足迹")
 end
 
 function Meiru:response(res, code, body, header)

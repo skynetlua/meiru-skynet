@@ -6,6 +6,9 @@ BIN_DIR=$(cd "$(dirname "$0")";pwd)
 WORK_SPACE=$(pwd)
 SCRIPT=${0}
 
+echo "BIN_DIR:${BIN_DIR}"
+echo "WORK_SPACE:${WORK_SPACE}"
+
 #项目配置文件
 CONFIG_FILE=${1}
 RETVAL=$(echo "${CONFIG_FILE}"|grep /)
@@ -276,9 +279,9 @@ clean(){
 	SKYNET_DIR=$(dirname "${BIN_DIR}")/skynet
 	cd ${SKYNET_DIR}/
 	make clean
-	cd ${SKYNET_DIR}/3rd/jemalloc
-	make clean
 	cd ${SKYNET_DIR}/3rd/lua
+	make clean
+	cd ${SKYNET_DIR}/3rd/jemalloc
 	make clean
 }
 
