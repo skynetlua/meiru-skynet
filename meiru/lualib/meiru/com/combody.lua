@@ -16,12 +16,12 @@ function ComBody:match(req, res)
 	end
 	local ret = content_type:find('application/x-www-form-urlencoded', 1, true)
 	if ret and type(req.rawbody) == 'string' then
-		local tmp = req.rawbody:urldecode()
+		local tmp = req.rawbody
 		local items = tmp:split("&")
 		local body = {}
 		for _,item in ipairs(items) do
 			tmp = item:split("=")
-			body[tmp[1]] = tmp[2] or ""
+			body[tmp[1]] = tmp[2] and tmp[2]:urldecode() or ""
 		end
 		req.body = body
 	end
