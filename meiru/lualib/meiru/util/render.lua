@@ -20,7 +20,7 @@ local function is_empty_txt(txt)
     return true
 end
 
-local __md_cache = QueueMap(300)
+local __md_cache = QueueMap(50)
 local function markdown(text)
     if os.mode == 'dev' then
         return '<div class="markdown-text">' .. Markdown(text or '') .. '</div>'

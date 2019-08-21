@@ -7,6 +7,9 @@ include "../../meiru/config/config.main"
 test_path = current_path
 lua_path  = lua_path .. test_path .. "lualib/?.lua;"
 
+--ip查询地址数据库
+ip2region = test_path.."assets/config/ip2region.data"
+
 --设置debug模式，上线需要注释
 debug = 1
 service_http = "app"

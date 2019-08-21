@@ -1,6 +1,7 @@
 
 local skynet = require "skynet"
 local meiru  = require "meiru.meiru"
+local api_router = require "api_router"
 
 local config = {
     name = 'meiru', 
@@ -17,7 +18,7 @@ local static_url  = "/"
 ---------------------------------------
 local router = meiru.router()
 
-local func = function(req, res)
+router.get('/', function(req, res)
     local data = {
         topic = {
             title = "hello elua"
@@ -37,15 +38,39 @@ local func = function(req, res)
             return "come from helloworld function"
         end
     end
-    res.render('index', data)
-end
+	res.render('index', data)
+end)
 
-router.get('/index', func)
-router.get('/', func)
+router.get('/system', function(req, res)
+    local tab = req.query.tab
+    local item = req.query.item 
+    res.set_layout(nil)
+    return res.render('system/index', {
+        cur_tab  = tab,
+        cur_item = item,
+    })
+end)
+
 
 ---------------------------------------
 --app
 ---------------------------------------
+local filed = require "meiru.lib.filed"
+
+local function staticFile(filePath)
+    local file_md5 = filed.file_md5(static_path..filePath)
+    if file_md5 then
+        if filePath:find('?') then
+            filePath = filePath.."&fv="..file_md5
+        else
+            filePath = filePath.."?fv="..file_md5
+        end
+    else
+        log("staticFile not find filePath =", static_path..filePath)
+    end
+    return filePath
+end
+
 local app = meiru.create_app()
 app.set("views_path", views_path)
 app.set("static_url", static_url)
@@ -53,9 +78,14 @@ app.set("session_secret", "meiru")
 
 --配置viewdata，方便在view elua中访问数据
 app.data("config", config)
+app.data("staticFile", staticFile)
 
 --静态资源路由
 app.use(meiru.static('/public', static_path))
+
+--api 借口
+local api_node = api_router.node()
+app.use(api_node)
 
 --动态网页路由
 app.use(router.node())

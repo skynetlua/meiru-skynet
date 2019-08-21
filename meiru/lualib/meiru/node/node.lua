@@ -277,7 +277,7 @@ function Node:footprint(depth)
         self.pass_mask = nil
         local rets = {}
         if self.path then
-            table.insert(rets, string.rep("++", depth) .. self.name..":"..self.path)
+            table.insert(rets, string.rep("++", depth) .. self.name..":"..self.path..(self.method or ''))
         else
             table.insert(rets, string.rep("++", depth) .. self.name)
         end
@@ -305,7 +305,11 @@ function Node:treeprint(depth)
     depth = (depth or 0)+1
     local rets = {}
     if self.path then
-        table.insert(rets, string.rep("++", depth) .. self.name..":"..self.path)
+        if self.method then
+            table.insert(rets, string.rep("++", depth) .. self.name..":["..self.method..":"..self.path.."]")
+        else
+            table.insert(rets, string.rep("++", depth) .. self.name..":["..self.path.."]")
+        end
     else
         table.insert(rets, string.rep("++", depth) .. self.name)
     end

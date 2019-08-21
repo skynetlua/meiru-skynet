@@ -55,7 +55,6 @@ local function do_request(fd, addr, protocol, handle)
                 do_response(fd, interface.write, 400, "need GET method")
             else
                 local ip = addr:match("([^:]+)")
-                -- local ip, port = string.match(addr, "(.+):(%d+)")
                 local req = {
                     fd       = fd,
                     protocol = protocol,
@@ -64,6 +63,7 @@ local function do_request(fd, addr, protocol, handle)
                     header   = header,
                     body     = body,
                     ip       = ip,
+                    addr     = addr,
                 }
                 local res = {
                     interface = interface,

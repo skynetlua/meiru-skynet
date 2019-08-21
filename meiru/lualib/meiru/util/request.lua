@@ -5,6 +5,7 @@ return function(app, req)
         app       = app,
         rawreq    = req,
         ip        = req.ip,
+        addr      = req.addr,
         rawmethod = req.method,
         rawbody   = req.body,
         rawurl    = req.url or "/",

@@ -53,7 +53,7 @@ update3rd :
 CSERVICE = snlua logger gate harbor
 LUA_CLIB = skynet \
   client \
-  bson md5 sproto lpeg $(TLS_MODULE) cjson lfs
+  bson md5 sproto lpeg $(TLS_MODULE) cjson lfs ip2region
 
 LUA_CLIB_SKYNET = \
   lua-skynet.c lua-seri.c \
@@ -127,6 +127,9 @@ $(LUA_CLIB_PATH)/lfs.so : 3rd/luafilesystem/src/lfs.c | $(LUA_CLIB_PATH)
 
 $(LUA_CLIB_PATH)/iconv.so : 3rd/lua-iconv/luaiconv.c | $(LUA_CLIB_PATH)
 	$(CC) $(CFLAGS) $(SHARED) -I3rd/lua-iconv $^ -o $@ -liconv
+
+$(LUA_CLIB_PATH)/ip2region.so : 3rd/ip2region/ip2region.c 3rd/ip2region/ip2region_lua.c | $(LUA_CLIB_PATH)
+	$(CC) $(CFLAGS) $(SHARED) -I3rd/ip2region $^ -o $@
 
 clean :
 	rm -f $(SKYNET_BUILD_PATH)/skynet $(CSERVICE_PATH)/*.so $(LUA_CLIB_PATH)/*.so

@@ -56,10 +56,21 @@ function FileBox:get_data(key)
 end
 
 function FileBox:get_file_content(path)
+    if os.mode == 'dev' then
+        local content = io.readfile(path)
+        if content then
+            local obj = stm.new(skynet.pack(content))
+            local copy_obj = stm.copy(obj)
+            return copy_obj
+        end
+        return
+    end
+
     local data = self:get_data(path)
     if data == false then
         return
     end
+    
     if not data then
         local content = io.readfile(path)
         if content then
@@ -70,15 +81,11 @@ function FileBox:get_file_content(path)
                 len = #content
             }
             if data.len < 5242880 then
-                if os.mode ~= 'dev' then
-                    self:set_data(path, data)
-                end
+                self:set_data(path, data)
             end
         else
-            if os.mode ~= 'dev' then
-                self:set_data(path, false)
-                self.file_md5s[path] = false
-            end
+            self:set_data(path, false)
+            self.file_md5s[path] = false
             return
         end
     end
@@ -87,6 +94,15 @@ function FileBox:get_file_content(path)
 end
 
 function FileBox:get_file_md5(path)
+    if os.mode == 'dev' then
+        local content = io.readfile(path)
+        if content then
+            local file_md5 = md5.sumhexa(content)
+            return file_md5
+        end
+        return
+    end
+
     local file_md5 = self.file_md5s[path]
     if file_md5 == false then
         return
@@ -109,14 +125,10 @@ function FileBox:get_file_md5(path)
     local content = io.readfile(path)
     if content then
         file_md5 = md5.sumhexa(content)
-        if os.mode ~= 'dev' then
-            self.file_md5s[path] = file_md5
-        end
+        self.file_md5s[path] = file_md5
         return file_md5
     else
-        if os.mode ~= 'dev' then
-            self.file_md5s[path] = false
-        end
+        self.file_md5s[path] = false
     end
 end
 

@@ -9,7 +9,7 @@ local function get_res(path)
     if not content then
         content = filed.file_read(views_path.."/"..path..".lua")
         if not content then
-            print("[ERROR]not exit path:", views_path.."/"..path..".lua", debug.traceback())
+            print("[ERROR]not exit path:", views_path.."/"..path..".html", debug.traceback())
             assert(false)
             return
         end

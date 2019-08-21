@@ -144,7 +144,7 @@ function Meiru:dispatch(req, res)
 				errmsg = errmsg.."\nRender chunk:\n"..renerror.chunk
 			end
 		end
-
+		log(logmsg.."\n"..errmsg)
 		self:response(res, 404, logmsg.."\n"..errmsg, {['content-type'] = "text/plain;charset=utf-8"})
 	end
 end
@@ -185,9 +185,7 @@ end
 
 -- function Meiru:dispatch(req, res)
 -- 	self.is_working = true
-
 -- 	local start_time = platform.time()
-
 -- 	local ret = self.node_req:dispatch(req, res)
 -- 	res.req_ret = res.is_end or ret
 -- 	res.is_end = nil

@@ -6,9 +6,6 @@ BIN_DIR=$(cd "$(dirname "$0")";pwd)
 WORK_SPACE=$(pwd)
 SCRIPT=${0}
 
-echo "BIN_DIR:${BIN_DIR}"
-echo "WORK_SPACE:${WORK_SPACE}"
-
 #项目配置文件
 CONFIG_FILE=${1}
 RETVAL=$(echo "${CONFIG_FILE}"|grep /)
@@ -112,6 +109,19 @@ check_arg(){
 	fi
 }
 
+backup_log(){
+	lOGPATH=${1}
+	if [[ -f ${lOGPATH} ]]; then
+		LOGDIR=$(dirname "${lOGPATH}")
+		FILENAME=$(basename ${lOGPATH})
+		FILENAME="${FILENAME%.*}"
+		SAVEDIR=${LOGDIR}/${FILENAME}/$(date "+%Y-%m-%d")
+		mkdir -p ${SAVEDIR}
+		SVAEFILE=$(date "+%H-%M-%S")
+		cp -f ${lOGPATH} ${SAVEDIR}/${SVAEFILE}.log
+	fi
+}
+
 start(){
 	if [ ! -f $(dirname "${BIN_DIR}")/skynet/skynet ];then
 		echo "需要编译后，才能运行"
@@ -125,7 +135,9 @@ start(){
 	if [[ ! -z ${LOGGER} ]]; then
 		LOGGER=$(echo ${LOGGER} | sed 's/^logger.*=.*"\(.*\)"$/\1/g')
 		mkdir -p $(dirname "${LOGGER}")
+		backup_log ${LOGGER}
 	fi
+
 	echo "${PROJECT}-${PROGRAM} start ..."
 	PID=$(ps -ef |grep ${CONFIG_FILE}|grep -v grep |awk '{print $2}')
 	if [[ ! -z ${PID} ]]; then
@@ -279,12 +291,15 @@ clean(){
 	SKYNET_DIR=$(dirname "${BIN_DIR}")/skynet
 	cd ${SKYNET_DIR}/
 	make clean
-	cd ${SKYNET_DIR}/3rd/lua
-	make clean
+	cd ${SKYNET_DIR}/cservice
+	rm -rf ${SKYNET_DIR}/cservice/*
+	cd ${SKYNET_DIR}/luaclib
+	rm -rf ${SKYNET_DIR}/luaclib/*
 	cd ${SKYNET_DIR}/3rd/jemalloc
 	make clean
+	cd ${SKYNET_DIR}/3rd/lua
+	make clean
 }
-
 
 case "${1}" in
 	start)shift 1;start ${@};;

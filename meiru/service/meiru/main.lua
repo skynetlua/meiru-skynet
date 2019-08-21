@@ -15,6 +15,11 @@ skynet.start(function()
     log("test_path =", skynet.getenv("test_path"))
     filed.init()
 
+    if skynet.getenv("ip2region") then
+        local ip2regiond = skynet.newservice("meiru/ip2regiond")
+        skynet.call(ip2regiond, "lua", "start", skynet.getenv("ip2region"))
+    end
+
     if service_http or service_ws then
         local httpd = skynet.newservice("meiru/serverd")
         local param = {
