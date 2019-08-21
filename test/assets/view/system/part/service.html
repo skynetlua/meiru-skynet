@@ -1,0 +1,82 @@
+<div class="layui-body">
+    <div style="padding: 15px;">
+    	<strong><h3 id="stat_title"><%- cur_item_data[2] %>表格</h3></strong>
+    	<table id="main" lay-filter="test"></table>
+    </div>
+</div>
+
+<div class="layui-footer">
+    © <a href="http://www.skynetlua.com">skynetlua</a> - 管理工具
+</div>
+
+<script src="https://www.layuicdn.com/layui/layui.js"></script>
+<script type="text/html" id="barDemo">
+  <a class="layui-btn layui-btn-xs" lay-event="edit">操作</a>
+</script>
+<!-- <script>
+//JavaScript代码区域
+layui.use('element', function(){
+  // var element = layui.element;
+});
+</script> -->
+<script>
+
+//表结构
+var struct = [
+		{field: 'sname', title: '服务ID', width:100},
+		{field: 'param', title: '服务参数', width:160},
+		{field: 'cmem',  title: 'C创建内存(kb)', width: 120},
+		{field: 'lmem',  title: 'lua创建内存(kb)', width:130},
+		{field: 'message', title: '累计消息数量', width: 120},
+		{field: 'cpu',   title: '累计CPU耗时(s)', width: 130},
+		{field: 'mqlen', title: '等待队列', width: 100},
+		{field: 'task',  title: '任务数', width: 80},
+    {fixed: 'right', title:'操作', toolbar: '#barDemo', width:150}
+	];
+
+layui.use('table', function(){
+ 	var table = layui.table;
+ 	table.render({
+    	elem: '#main',
+    	height: 480,
+    	url: '/api/system/<%- cur_item %>', //数据接口
+    	// page: true, //开启分页
+    	cols: [struct],
+        parseData: function(res){
+            var cur_item = "<%- cur_item %>";
+            if (cur_item == "service") {
+                var total = res.total;
+                var block = res.block;
+                var dom = document.getElementById("stat_title")
+                dom.innerHTML = "<%- cur_item_data[2] %>表格    "+"运行情况("+total+"个block，总内存:"+(total>>20)+"Mb "+(total%1024)+"Kb)";
+            }
+            return {
+              "code": res.code,
+              "msg": res.msg,
+              "count": res.count,
+              "data": res.data
+            };
+        }
+  	});
+
+    //监听行工具事件
+    table.on('tool(test)', function(obj){
+      var data = obj.data;
+      //console.log(obj)
+     if(obj.event === 'edit'){
+        layer.prompt({
+            formType: 2,
+            value: "很抱歉，需要管理权限"
+            // value: data.email
+        }, function(value, index){
+          // obj.update({
+          //   email: value
+          // });
+          layer.close(index);
+        });
+      }
+    });
+});
+</script>
+
+

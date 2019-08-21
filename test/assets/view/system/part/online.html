@@ -1,0 +1,82 @@
+
+
+<div class="layui-body">
+    <div style="padding: 15px;">
+<!--     	<strong><h3 id="stat_title"><%- cur_item_data[2] %>表格</h3></strong>
+ -->    	<div id="main" style="height:400px"></div>
+    </div>
+</div>
+
+<div class="layui-footer">
+    © <a href="http://www.skynetlua.com">skynetlua</a> - 管理工具
+</div>
+
+<script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
+
+<script type="text/javascript">
+    function showdata(xdata, ydata) {
+        require.config({
+            paths: {
+                echarts: 'http://echarts.baidu.com/build/dist'
+            }
+        });
+        require(
+            ['echarts','echarts/chart/line'],
+            function (ec) {
+                var myChart = ec.init(document.getElementById('main')); 
+                var option = {
+                    title : {
+                        text: '访问次数统计'
+                    },
+                    tooltip : {
+                        trigger: 'axis'
+                    },
+                    legend: {
+                        data:['每30分钟访问次数']
+                    },
+                    // calculable : true,
+                    xAxis : [
+                        {
+                            type : 'category',
+                            boundaryGap : false,
+                            data : xdata
+                        }
+                    ],
+                    yAxis : [
+                        {
+                            type : 'value'
+                        }
+                    ],
+                    series : [
+                        {
+                            name:'次数',
+                            type:'line',
+                            smooth:true,
+                            itemStyle: {normal: {areaStyle: {type: 'default'}}},
+                            data:ydata
+                        },
+                    ]
+                };
+                myChart.setOption(option); 
+            }
+        );
+    }
+
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function(){
+        if(xmlhttp.readyState == 4 && xmlhttp.status == 200){
+            var retval = JSON.parse(xmlhttp.responseText)
+            var src_data = retval.data;
+            var xdata = [];
+            var ydata = [];
+            for (var i = 0; i < src_data.length; i++) {
+                xdata.push(src_data[i][0]);
+                ydata.push(src_data[i][1]);
+            }
+            showdata(xdata, ydata);
+        }
+    }
+    xmlhttp.open("GET","/api/system/<%- cur_item %>",true);
+    xmlhttp.send();
+
+</script>

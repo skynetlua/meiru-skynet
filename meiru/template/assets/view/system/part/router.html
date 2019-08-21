@@ -1,0 +1,131 @@
+<div class="layui-body">
+    <div style="padding: 15px;">
+    	<strong><h3 id="stat_title"><%- cur_item_data[2] %>结构图</h3></strong>
+        <div id="main"></div>
+    </div>
+</div>
+
+
+<div class="layui-footer">
+    © <a href="http://www.skynetlua.com">skynetlua</a> - 管理工具
+</div>
+
+<script src="https://www.layuicdn.com/layui/layui.js"></script>
+<!-- <script>
+//JavaScript代码区域
+layui.use('element', function(){
+  // var element = layui.element;
+});
+</script> -->
+<script>
+
+function find_level(txt) {
+    var level = 0;
+    for (var j = 0; j < txt.length; j+=2) {
+        if (txt[j] == "+" ){
+            console.assert(txt[j+1] == "+");
+            level++;
+        }else if (txt[j] == "-" ){
+            console.assert(txt[j+1] == "-");
+            level++;
+        }else{
+            break;
+        }
+    }
+    return level;
+}
+
+function convert_tree(src_data) {
+    var txts = src_data.split("\n");
+    var datas;
+    var stack = [];
+    for (var i = 0, len = txts.length; i < len; i++) {
+        var txt = txts[i];
+        var level = find_level(txt);
+        var title = txt.substring(level*2);
+        var new_data = {
+            level: level,
+            title: title,
+            spread: true
+        };
+        if (stack.length == 0) {
+            datas = new_data;
+            stack.push(new_data);
+        }else{
+            var cur_data = stack[stack.length-1];
+            if (txt[1] == "+"){
+                if (cur_data.level < level) {
+                    if (!cur_data.children) {
+                        cur_data.children = [];
+                    }
+                    cur_data.children.push(new_data);
+                    stack.push(new_data);
+                }else if (cur_data.level == level) {
+                    stack.pop();
+                    cur_data = stack[stack.length-1];
+                    cur_data.children.push(new_data);
+                    stack.push(new_data);
+                }else{
+                    for (var k = level; k <= cur_data.level; k++) {
+                        stack.pop();
+                    }
+                    cur_data = stack[stack.length-1];
+                    cur_data.children.push(new_data);
+                    stack.push(new_data);
+                }
+            }else if (txt[1] == "-"){
+                if (!cur_data.coms) {
+                    cur_data.coms = [];
+                }
+                cur_data.coms.push(title);
+            }else{
+                console.assert(false);
+            }
+        }
+    }
+    return datas;
+}
+
+
+function foreach(node, func) {
+    if (func) {
+        func(node);
+    }
+    if (node.children) {
+        for (var i = 0; i < node.children.length; i++) {
+            foreach(node.children[i], func);
+        }
+    }
+}
+
+var xmlhttp = new XMLHttpRequest();
+xmlhttp.onreadystatechange = function(){
+    if(xmlhttp.readyState == 4 && xmlhttp.status == 200){
+        var retval = JSON.parse(xmlhttp.responseText)
+        var src_data = retval.data;
+        var tree_node = convert_tree(src_data);
+        var __id = 1;
+        foreach(tree_node, function(node) {
+            if (node.coms) {
+                node.title = node.title+" &nbsp;&nbsp;["+node.coms.join(",")+"]"
+            }
+            node.id = __id++;
+            node.level = null;
+        });
+        layui.use(['tree'], function(){
+            layui.tree.render({
+                elem: '#main',
+                data: [tree_node],
+                expandClick: false,
+                // showLine: false, //关闭连接线
+            });
+        });
+    }
+}
+
+xmlhttp.open("GET","/api/system/<%- cur_item %>",true);
+xmlhttp.send();
+
+</script>
+
+

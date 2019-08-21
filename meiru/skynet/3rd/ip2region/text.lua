@@ -1,0 +1,5 @@
+local ip2region = require("ip2region")
+ip2region.init("ip2region.db")
+print(ip2region.find("1.2.176.224"))
+print(ip2region.ip2long("209.207.224.40"))
+print(ip2region.long2ip(3520061480))

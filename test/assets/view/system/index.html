@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <!-- meta -->
+    <meta charset="utf-8" />
+    <meta name='description' content='<%= config.description %>' />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="keywords" content="<%= config.keywords %>"/>
+    <meta name="referrer" content="always" />
+    <link rel="stylesheet" type="text/css" href="https://www.layuicdn.com/layui/css/layui.css" />
+    <script src="https://cdn.staticfile.org/vue/2.4.2/vue.min.js"></script>
+
+    <title>系统管理后台</title>
+</head>
+<body>
+
+<% 
+    local tab_datas = {
+        {'console', '控制台'}, 
+        {'user', '用户'}
+    }
+    cur_tab = cur_tab or tab_datas[1][1]
+
+    local item_datas_group = {
+        ['console'] = {
+            {'service', '服务状况'},
+            {'network', '网络状况'},
+            {'router', '路由树'},
+        },
+        ['user'] = {
+            {'visit', '访问统计'},
+            {'online', '在线统计'},
+        }
+    }
+    local item_datas = item_datas_group[cur_tab]
+    cur_item = cur_item or item_datas[1][1]
+    local cur_tab_data
+    local cur_item_data
+ %>
+
+    <div class="layui-layout layui-layout-admin">
+        <div class="layui-header">
+            <div class="layui-logo">管理后台</div>
+            <!-- 头部区域（可配合layui已有的水平导航） -->
+            <ul class="layui-nav layui-layout-left">
+            <% 
+            for _,tab_data in ipairs(tab_datas) do
+                local href = "system?tab=".. tab_data[1]
+                if tab_data[1] == cur_tab then
+                    cur_tab_data = tab_data
+                %>
+                <li class="layui-nav-item layui-this"><a href="<%- href %>"><%- tab_data[2] %></a></li>
+                <% else %>
+                <li class="layui-nav-item"><a href="<%- href %>"><%- tab_data[2] %></a></li>
+                <% end %>
+            <% end %>
+            </ul>
+            <ul class="layui-nav layui-layout-right">
+                <li class="layui-nav-item"><a href="/">首页</a></li>
+            </ul>
+        </div>
+
+        <div class="layui-side layui-bg-black">
+            <div class="layui-side-scroll">
+                <ul class="layui-nav layui-nav-tree" lay-filter="test">
+                <% 
+                for _,item_data in ipairs(item_datas) do
+                    local href = "/system?tab=" .. cur_tab_data[1] .. "&item=" .. item_data[1]
+                    if item_data[1] == cur_item then
+                        cur_item_data = item_data
+                %>
+                    <li class="layui-nav-item layui-this"><a href="<%- href %>"><%- item_data[2] %></a></li>
+                    <% else %>
+                    <li class="layui-nav-item"><a href="<%- href %>"><%- item_data[2] %></a></li>
+                    <% end %>
+                <% end %>
+                </ul>
+            </div>
+        </div>
+
+        <%- partial('./part/'..cur_item, {
+            cur_item = cur_item,
+            cur_item_data = cur_item_data
+        }) %>
+    </div>
+</body>
+</html>
+

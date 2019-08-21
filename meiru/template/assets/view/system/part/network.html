@@ -1,0 +1,49 @@
+
+<div class="layui-body">
+    <div style="padding: 15px;">
+    	<strong><h3 id="stat_title"><%- cur_item_data[2] %>表格</h3></strong>
+    	<table id="main" lay-filter="test"></table>
+    </div>
+</div>
+
+<div class="layui-footer">
+    © <a href="http://www.skynetlua.com">skynetlua</a> - 管理工具
+</div>
+
+<script src="https://www.layuicdn.com/layui/layui.js"></script>
+<!-- <script>
+//JavaScript代码区域
+layui.use('element', function(){
+  // var element = layui.element;
+});
+</script> -->
+<script>
+
+//表结构
+var struct = [
+	{field: 'sname', title: '服务ID', width:100},
+	{field: 'param', title: '服务参数', width:90},
+	{field: 'id',    title: 'socketID', width: 80, sort: true},
+	{field: 'type',  title: '类型', width:80},
+	{field: 'peer',  title: '客户端peer', width: 177},
+	{field: 'wbuffer', title: '发送缓冲(kb)', width: 80},
+	{field: 'write', title: '已发数据(kb)', width: 80},
+	{field: 'read',  title: '接收数据(kb)', width: 80},
+	{field: 'rtime', title: '读累计时间(s)', width: 135},
+	{field: 'wtime', title: '写累计时间(s)', width: 135},
+];
+
+layui.use('table', function(){
+ 	var table = layui.table;
+ 	table.render({
+    	elem: '#main',
+    	height: 480,
+    	url: '/api/system/<%- cur_item %>', //数据接口
+    	// page: true, //开启分页
+    	cols: [struct]
+  	});
+});
+
+</script>
+
+

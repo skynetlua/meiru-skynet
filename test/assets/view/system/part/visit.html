@@ -1,0 +1,59 @@
+
+<div class="layui-body">
+    <div style="padding: 15px;">
+    	<strong><h3 id="stat_title"><%- cur_item_data[2] %>表格</h3></strong>
+    	<table id="main" lay-filter="test"></table>
+    </div>
+</div>
+
+<div class="layui-footer">
+    © <a href="http://www.skynetlua.com">skynetlua</a> - 管理工具
+</div>
+
+<script src="https://www.layuicdn.com/layui/layui.js"></script>
+<!-- <script>
+//JavaScript代码区域
+layui.use('element', function(){
+  // var element = layui.element;
+});
+</script> -->
+<script>
+
+//表结构
+var struct = [
+    {field: 'id', title: '序号ID', width: 80},
+    {field: 'ip', title: '终端IP', width: 150},
+    {field: 'address', title: 'IP归属地', width: 250},
+    {field: 'slaveid',  title: '服务ID', width: 100},
+    {field: 'visit_times',  title: '总访问次数', width: 100},
+    {field: 'last_visit_time', title: '最近访问时间', width: 240},
+    {field: 'max_stimes', title: '最大次数每秒', width: 130},
+    {field: 'max_mtimes',   title: '最大次数每分', width: 130},
+];
+
+layui.use('table', function(){
+ 	var table = layui.table;
+ 	table.render({
+    	elem: '#main',
+    	height: 480,
+    	url: '/api/system/<%- cur_item %>', //数据接口
+    	// page: true, //开启分页
+    	cols: [struct],
+        parseData: function(res){
+            var cur_item = "<%- cur_item %>";
+            if (cur_item == "visit") {
+                var dom = document.getElementById("stat_title")
+                dom.innerHTML = "<%- cur_item_data[2] %>表格    "+"您的IP为:("+res.addr+" ["+res.region+"])";
+            }
+            return {
+              "code": res.code,
+              "msg": res.msg,
+              "count": res.count,
+              "data": res.data
+            };
+        }
+  	});
+});
+</script>
+
+
