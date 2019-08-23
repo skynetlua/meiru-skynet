@@ -1,4 +1,3 @@
-local config = require "config"
 local skynet = require "skynet"
 local systemd = require "meiru.lib.systemd"
 
