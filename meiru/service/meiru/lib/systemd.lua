@@ -21,7 +21,6 @@ local function set_data(key, data, timeout)
     _caches[key] = cache
 end
 
-
 local weak_day_names = {"星期日","星期一","星期二","星期三","星期四","星期五","星期六"}
 local function showDate(ts)
     ts = ts or os.time()
@@ -57,9 +56,100 @@ local function get_serverds()
     return _serverds
 end
 
+
+-------------------------------------------------
+--system
+-------------------------------------------------
+local function excute_cmd(cmd)
+    local file = io.popen(cmd)
+    local ret = file:read("*all")
+    return ret
+end
+
+local function get_system_info()
+    local cmd = "top -bn 2 -i -c -d 0.1"        
+    local output = excute_cmd(cmd)
+    if type(output) ~= "string" or #output == 0 then
+        return
+    end
+    local i, j = output:find("%s\ntop.*" )
+    local ret = output:sub(i, j)
+    return ret
+end
+
+local function match_num(str, patten)
+    local num = str:match(patten)
+    assert(num)
+    num = num:match("[0-9]+%.*[0-9]*")
+    num = tonumber(num)
+    assert(num)
+    return num
+end
+
+local function get_cpu_usage(info)
+    local cpu_user = match_num(info, "[0-9]+%.?[0-9]*%sus,")
+    local cpu_system = match_num(info, "[0-9]+%.?[0-9]*%ssy,")
+    local cpu_nice = match_num(info, "[0-9]+%.?[0-9]*%sni,")
+    local cpu_idle = match_num(info, "[0-9]+%.?[0-9]*%sid,")
+    local cpu_wait = match_num(info, "[0-9]+%.?[0-9]*%swa,")
+    local cpu_hardware_interrupt = match_num(info, "[0-9]+%.?[0-9]*%shi,")
+    local cpu_software_interrupt = match_num(info, "[0-9]+%.?[0-9]*%ssi,")
+    local cpu_steal_time = match_num(info, "[0-9]+%.?[0-9]*%sst")
+
+    local cpu_total = cpu_user + cpu_nice + cpu_system + cpu_wait + cpu_hardware_interrupt + cpu_software_interrupt + cpu_steal_time + cpu_idle 
+    local cpu_cost = cpu_user + cpu_nice + cpu_system + cpu_wait + cpu_hardware_interrupt + cpu_software_interrupt + cpu_steal_time
+    local cpu_usage = cpu_cost / cpu_total
+    return cpu_usage
+end
+
+local function get_mem_usage(info)
+    local mem_total = match_num(info, "Mem[%d%p%s]*[0-9]+%stotal")
+    local mem_used = match_num(info, "free[%d%p%s]*[0-9]+%sused")
+    local mem_usage = mem_used / mem_total
+    return mem_usage
+end
+
+
+local system_stats = {}
+
+local function do_system_record()
+    local info = get_system_info()
+    local cpu_usage = get_cpu_usage(info)
+    local mem_usage = get_mem_usage(info)
+
+    local system_stat = {
+        time = os.date("%x %H:%M"),
+        cpu_usage = cpu_usage,
+        mem_usage = mem_usage
+    }
+    table.insert(system_stats, system_stat)
+    if #system_stats > 60 then
+        table.remove(system_stats, 1)
+    end
+
+    local delta_time = 60*3
+    skynet.timeout(delta_time*100, function() 
+        do_system_record()
+    end)
+end
+
+local function start_system_record()
+    local info = get_system_info()
+    if not info then
+        skynet.error("很抱歉，该系统不支持命令:top -bn 2 -i -c -d 0.1")
+        return
+    end
+    do_system_record()
+end
+
+
 -------------------------------------------------
 -------------------------------------------------
 local command = {}
+
+function command.system_stat()
+    return system_stats
+end
 
 function command.service_stat()
     local list = skynet.call(".launcher", "lua", "LIST")
@@ -175,31 +265,38 @@ end
 
 function command.online_stat()
     local serverds = get_serverds()
-    local onlines = {}
+    local total_records = {}
     for _,serverd in ipairs(serverds) do
-        local total_times = skynet.call(serverd, "lua", "total_times")
-        for minute,times in pairs(total_times) do
-            onlines[minute] = (onlines[minute] or 0)+times
+        local server_records = skynet.call(serverd, "lua", "server_records")
+        for minute,record in pairs(server_records) do
+            local tt_record = total_records[minute]
+            if not tt_record then
+                tt_record = record
+                total_records[minute] = tt_record
+            else
+                assert(tt_record.time == minute)
+                tt_record.ip_times = tt_record.ip_times+record.ip_times
+                tt_record.visit_times = tt_record.visit_times+record.visit_times
+            end
         end
     end
+
     local minutes = {}
-    for minute,_ in pairs(onlines) do
+    for minute,record in pairs(total_records) do
+        record.time = os.date("%x %H:%M", minute*1800)
         table.insert(minutes, minute)
     end
     table.sort(minutes)
-    local start_idx = 1
-    if #minutes > 60 then
-        start_idx = #minutes-60
-    end
+    
     local rets = {}
-    for i=start_idx,#minutes do
-        local minute = minutes[i]
-        table.insert(rets, {os.date("%x %H:%M", minute*1800), onlines[minute]})
+    for i,v in ipairs(minutes) do
+        table.insert(rets, total_records[v])
     end
     return rets
 end
 
 skynet.start(function()
+    start_system_record()
 	skynet.dispatch("lua", function(_,_,cmd,...)
         local data = get_data(cmd)
         if data then

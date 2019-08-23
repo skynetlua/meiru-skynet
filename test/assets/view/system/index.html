@@ -7,6 +7,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="keywords" content="<%= config.keywords %>"/>
     <meta name="referrer" content="always" />
+    <% if config.site_icon then %>
+    <link rel="icon" href="<%- config.site_icon %>" type="image/x-icon"/>
+    <% end %>
+    <link rel="stylesheet" href="<%- staticFile('/public/system/meiru.css') %>">
+
     <link rel="stylesheet" type="text/css" href="https://www.layuicdn.com/layui/css/layui.css" />
     <script src="https://cdn.staticfile.org/vue/2.4.2/vue.min.js"></script>
 
@@ -23,13 +28,14 @@
 
     local item_datas_group = {
         ['console'] = {
+            {'system', '系统状况'},
             {'service', '服务状况'},
             {'network', '网络状况'},
             {'router', '路由树'},
         },
         ['user'] = {
-            {'visit', '访问统计'},
-            {'online', '在线统计'},
+            {'visit', '访问IP详情'},
+            {'online', '访问次数统计'},
         }
     }
     local item_datas = item_datas_group[cur_tab]

@@ -48,7 +48,7 @@ layui.use('table', function(){
                 var total = res.total;
                 var block = res.block;
                 var dom = document.getElementById("stat_title")
-                dom.innerHTML = "<%- cur_item_data[2] %>表格    "+"运行情况("+total+"个block，总内存:"+(total>>20)+"Mb "+(total%1024)+"Kb)";
+                dom.innerHTML = "<%- cur_item_data[2] %>表格    "+"运行情况("+total+"个block，堆内存:"+(total>>20)+"Mb "+(total%1024)+"Kb)";
             }
             return {
               "code": res.code,

@@ -2,8 +2,8 @@
 
 <div class="layui-body">
     <div style="padding: 15px;">
-<!--     	<strong><h3 id="stat_title"><%- cur_item_data[2] %>表格</h3></strong>
- -->    	<div id="main" style="height:400px"></div>
+<!--        <strong><h3 id="stat_title"><%- cur_item_data[2] %>表格</h3></strong>
+ -->        <div id="main" style="height:400px"></div>
     </div>
 </div>
 
@@ -26,13 +26,13 @@
                 var myChart = ec.init(document.getElementById('main')); 
                 var option = {
                     title : {
-                        text: '访问次数统计'
+                        text: '每3分钟记录系统CPU和内存使用率'
                     },
                     tooltip : {
                         trigger: 'axis'
                     },
                     legend: {
-                        data:['每30分钟连接次数','每30分钟访问IP数']
+                        data:['CPU使用率','内存使用率']
                     },
                     // calculable : true,
                     xAxis : [
@@ -49,14 +49,14 @@
                     ],
                     series : [
                         {
-                            name:'次数',
+                            name:'CPU使用率',
                             type:'line',
                             smooth:true,
                             itemStyle: {normal: {areaStyle: {type: 'default'}}},
                             data:datas[1]
                         },
                         {
-                            name:'IP数',
+                            name:'内存使用率',
                             type:'line',
                             smooth:true,
                             itemStyle: {normal: {areaStyle: {type: 'default'}}},
@@ -77,8 +77,8 @@
             var datas = [[],[],[]];
             for (var i = 0; i < src_data.length; i++) {
                 datas[0].push(src_data[i].time);
-                datas[1].push(src_data[i].visit_times);
-                datas[2].push(src_data[i].ip_times);
+                datas[1].push(src_data[i].cpu_usage.toFixed(4)*100);
+                datas[2].push(src_data[i].mem_usage.toFixed(4)*100);
             }
             showdata(datas);
         }

@@ -1,6 +1,7 @@
+local config = require "config"
 local skynet = require "skynet"
-
 local systemd = require "meiru.lib.systemd"
+
 
 local _ip2regiond
 local function get_ip2regiond()
@@ -78,6 +79,17 @@ local cmds = {
 			code = 0,
 			msg  = "",
 			data = data,
+		}
+		return retval
+	end,
+
+	["system"] = function(req, res, page, limit)
+		local data = systemd.system_stat()
+		local retval = {
+			code = 0,
+			msg  = "",
+			count = #data,
+			data  = data,
 		}
 		return retval
 	end,

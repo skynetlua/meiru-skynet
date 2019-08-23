@@ -9,7 +9,6 @@ local string = string
 local kMCountPerIpPerSecond = 60
 local kMCountPerIpPerMinute = 60*10
 
-
 local listen_fd 
 local slaves  = {}
 local balance = 1
@@ -100,14 +99,26 @@ end
 
 -----------------------------------------
 -----------------------------------------
-local total_anchor = math.floor(os.time()/1800)
+local total_anchor = 0
+local _total_keys = {}
 local _total_times = {}
-local function record_times()
+local _total_ip_times = {}
+local function record_times(ip)
     local cur_anchor = math.floor(os.time()/1800)
     if total_anchor ~= cur_anchor then
         total_anchor = cur_anchor
+        table.insert(_total_keys, cur_anchor)
+        if #_total_keys>60 then
+            local key = table.remove(_total_keys, 1)
+            _total_ip_times[key] = nil
+            _total_times[key] = nil
+        end
+        if not _total_ip_times[cur_anchor] then
+            _total_ip_times[cur_anchor] = {}
+        end
     end
-    _total_times[total_anchor] = (_total_times[total_anchor] or 0)+1
+    _total_ip_times[cur_anchor][ip] = true
+    _total_times[cur_anchor] = (_total_times[cur_anchor] or 0)+1
 end
 
 local function get_client(ip)
@@ -120,9 +131,8 @@ local function get_client(ip)
 end
 
 local function client_enter(fd, addr)
-    record_times()
-
     local ip = addr:match("([^:]+)")
+    record_times(ip)
     if blacklists[ip] then
         return
     end
@@ -206,8 +216,23 @@ function command.client_infos()
     return infos
 end
 
-function command.total_times()
-    return _total_times
+function command.server_records()
+    local records = {}
+    local record, ip_times,tmp
+    for _,key in ipairs(_total_keys) do
+        tmp = _total_ip_times[key]
+        ip_times = 0
+        for _ in pairs(tmp) do
+            ip_times = ip_times+1
+        end
+        record = {
+            time = key,
+            ip_times = ip_times,
+            visit_times = _total_times[key]
+        }
+        records[key] = record
+    end
+    return records
 end
 
 function command.exit()
