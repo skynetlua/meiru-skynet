@@ -43,8 +43,27 @@ local function class(cname, super)
 end
 
 local function string_split(str, sep)
-    local retval = {}
-    string.gsub(str, string.format("([^%s]+)", (sep or "\t")), function(c)
+	local retval = {}
+	local idx = 1
+	local s, e
+	while true do
+		s, e = str:find(sep, idx, true)
+		if not s then
+			table.insert(retval, str:sub(idx))
+			break
+		end
+		table.insert(retval, str:sub(idx, s-1))
+		idx = e+1
+	end
+    -- 	string.gsub(str, string.format("([^%s]+)", (sep or "\t")), function(c)
+    --     	table.insert(retval, c)
+    -- 	end)
+    return retval
+end
+
+local function string_multi_split(str, sep)
+	local retval = {}
+    str:gsub("([^"..(sep or "\t").."]+)", function(c)
         table.insert(retval, c)
     end)
     return retval
@@ -225,7 +244,7 @@ function Piece:render(parent)
 	end
 	local wdt
 	if node[5] then
-		local strs = string_split(self._content1, " ")
+		local strs = string_multi_split(self._content1, " ")
 		local props = {}
 		local url
 		if #strs > 1 then
@@ -589,7 +608,8 @@ function TableBlock:process(blocks, point, len, cbBlocks)
 	if not headBlock or headBlock._node[1] ~= "txt" then
 		return originPoint
 	end
-	local ths = string_split(headBlock._line, "|")
+
+	local ths = string_multi_split(headBlock._line, "|")
 	if #ths ~= num then
 		return originPoint
 	end
@@ -634,7 +654,7 @@ function TableBlock:process(blocks, point, len, cbBlocks)
 	while point <= len do
 		block = blocks[point]
 		if block._node[1] == "txt" then
-			local tds = string_split(block._line, "|")
+			local tds = string_multi_split(block._line, "|")
 			if #tds >= 1 then
 				self.bodyBlocks = self.bodyBlocks or {}
 				table.insert(self.bodyBlocks, block)
