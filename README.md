@@ -68,7 +68,7 @@ meiru create test
 ```
 ./meiru/bin/meiru start test
 ```
-浏览器打开127.0.0.1:8080/index。既可以看到结果
+浏览器打开127.0.0.1:8080。即可以看到结果
 
 ### 6. 停止服务
 ```
