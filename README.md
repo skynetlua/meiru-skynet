@@ -53,7 +53,10 @@ meiru setup会自动下载安装gcc，autoconf，readline，openssl等。
 ```
 ./meiru/bin/meiru clean
 ```
-
+如果brew更新很慢，请执行下面命令，切换清华大学都源
+```
+./meiru/bin/meiru brewup
+```
 ### 4. 创建工程
 以创建test项目为例，在终端，cd到meiru-skynet目录下。执行
 ```
@@ -74,7 +77,11 @@ meiru create test
 ```
 ./meiru/bin/meiru stop test
 ```
-
+### 7. protobuffer支持
+执行下面命令执行编译protobuf模块。
+```
+./meiru/bin/meiru buildpbc
+```
 
 test项目的结构如下
 ```
