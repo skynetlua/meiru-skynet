@@ -225,6 +225,7 @@ setup_darwin(){
 		echo "need install make"
 		exit
 	fi
+	xcode-select --install
 	brew install autoconf
 	brew install readline
 	brew install openssl
@@ -242,8 +243,6 @@ setup(){
 			setup_ubuntu
 			break
 		fi
-		break
-		echo "Sorry,NO support install program. feedback to github!"
 		checkexist brew
 		if [[ ! -z "${RET}" ]]; then
 			setup_darwin
@@ -264,6 +263,8 @@ build(){
 	SYSTEM=$(uname)
 	if [[ "${SYSTEM}" = "Darwin" ]]; then
 		SYSTEM="macosx"
+		export CPATH=/usr/local/opt/openssl/include
+		export LIBRARY_PATH=/usr/local/opt/openssl/lib
 	fi
 	SYSTEM=$(echo $SYSTEM | tr '[A-Z]' '[a-z]')
 	make ${SYSTEM}
