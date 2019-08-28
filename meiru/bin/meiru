@@ -302,6 +302,20 @@ clean(){
 	make clean
 }
 
+brewup(){
+	cd "$(brew --repo)"
+	git remote set-url origin https://mirrors.tuna.tsinghua.edu.cn/git/homebrew/brew.git
+	git checkout master
+	git pull origin master
+
+	cd "$(brew --repo)/Library/Taps/homebrew/homebrew-core"
+	git remote set-url origin https://mirrors.tuna.tsinghua.edu.cn/git/homebrew/homebrew-core.git
+	git checkout master
+	git pull origin master
+
+	brew update
+}
+
 case "${1}" in
 	start)shift 1;start ${@};;
 	stop)shift 1;stop ${@};;
@@ -311,7 +325,8 @@ case "${1}" in
 	build)build;;
 	clean)clean;;
 	buildpbc)buildpbc;;
-	*)echo "Usage : ${0} start|stop|create|kill|setup|build|clean|buildpbc,not ${1}"
+	brewup)brewup;;
+	*)echo "Usage : ${0} start|stop|create|kill|setup|build|clean|buildpbc|brewup,not ${1}"
 esac
 
 # automake
