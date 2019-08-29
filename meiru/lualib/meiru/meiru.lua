@@ -109,11 +109,18 @@ local LineChars = "\n--------------------------------------\n"
 function Meiru:dispatch(req, res)
 	self.is_working = true
 	local start_time = platform.time()
-	local ok, ret = pcall(self.node_req.dispatch, self.node_req, req, res)
+	local traceback
+	local err_msg
+	local function throw_error(msg)
+		err_msg = msg
+		traceback = debug.traceback()
+	end
+	local ok, ret = xpcall(self.node_req.dispatch, throw_error, self.node_req, req, res)
+	-- local ok, ret = pcall(self.node_req.dispatch, self.node_req, req, res)
 	if ok then
 		res.req_ret = res.is_end or ret
 		res.is_end = nil
-		ok, ret = pcall(self.node_res.dispatch, self.node_res, req, res)
+		ok, ret = xpcall(self.node_res.dispatch, throw_error, self.node_res, req, res)
 	end
 	if ok then
 		if self.enable_footprint then
@@ -133,7 +140,7 @@ function Meiru:dispatch(req, res)
 			logmsg = logmsg .."\ndispatch cost_time:" .. (platform.time() - start_time)
 			logmsg = logmsg ..LineChars.."FOOTPRINT"..LineChars..(self.node_req:footprint() or 'nothing')
 		end
-		local errmsg = LineChars.."ERROR"..LineChars..(ret or "").."\n"..debug.traceback()
+		local errmsg = LineChars.."ERROR"..LineChars..(err_msg or "").."\n"..traceback
 		if req.app.__render_error then
 			local renerror = req.app.__render_error
 			req.app.__render_error = nil
@@ -155,15 +162,22 @@ if os.mode ~= 'dev' then
 function Meiru:dispatch(req, res)
 	self.is_working = true
 	local start_time = platform.time()
-	local ok, ret = pcall(self.node_req.dispatch, self.node_req, req, res)
+	local traceback
+	local err_msg
+	local function throw_error(msg)
+		err_msg = msg
+		traceback = debug.traceback()
+	end
+
+	local ok, ret = xpcall(self.node_req.dispatch, throw_error, self.node_req, req, res)
 	if ok then
 		res.req_ret = res.is_end or ret
 		res.is_end = nil
-		ok, ret = pcall(self.node_res.dispatch, self.node_res, req, res)
+		ok, ret = xpcall(self.node_res.dispatch, throw_error, self.node_res, req, res)
 	end
 	if not ok then
 		log("Meiru req:", req.rawreq)
-		log(ret.."\n"..debug.traceback())
+		log(err_msg.."\n"..traceback)
 	end
 
 	if self.enable_footprint then
