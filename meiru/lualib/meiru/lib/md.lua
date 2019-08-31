@@ -391,7 +391,7 @@ function Block:quickParse(lines, point)
 			local tmps = {}
 			for i=point,#lines do
 				line = lines[i]
-				if self:searchPatternTail(line, 1, #line, pattern) then
+				if #line > 0 and self:searchPatternTail(line, 1, #line, pattern) then
 					self.endIdx = len
 					self._lines = tmps
 					point = i + 1
